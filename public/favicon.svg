@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 몸으로 말해요 앱 아이콘: 주황 배경에 팔 벌린 사람 픽토그램 -->
+  <rect width="512" height="512" fill="#f97316"/>
+  <circle cx="256" cy="132" r="52" fill="#ffffff"/>
+  <!-- 몸통 -->
+  <rect x="232" y="196" width="48" height="150" rx="24" fill="#ffffff"/>
+  <!-- 팔: 양쪽 위로 벌림 -->
+  <rect x="120" y="150" width="150" height="44" rx="22" fill="#ffffff" transform="rotate(-30 195 172)"/>
+  <rect x="242" y="150" width="150" height="44" rx="22" fill="#ffffff" transform="rotate(30 317 172)"/>
+  <!-- 다리: 양쪽으로 벌림 -->
+  <rect x="196" y="320" width="44" height="140" rx="22" fill="#ffffff" transform="rotate(20 218 390)"/>
+  <rect x="272" y="320" width="44" height="140" rx="22" fill="#ffffff" transform="rotate(-20 294 390)"/>
+  <!-- 말풍선 점 3개: '말해요' 표현 -->
+  <circle cx="392" cy="88" r="18" fill="#ffffff" opacity="0.95"/>
+  <circle cx="440" cy="72" r="13" fill="#ffffff" opacity="0.8"/>
+  <circle cx="474" cy="56" r="9" fill="#ffffff" opacity="0.65"/>
+</svg>

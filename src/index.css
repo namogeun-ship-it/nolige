@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+@theme {
+  /* Pretendard가 설치돼 있으면 사용, 없으면 iPad 기본 한글 폰트로 폴백 */
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--color-amber-50);
+  color: var(--color-slate-900);
+  /* 게임용 앱: 더블탭 확대·텍스트 선택·롱프레스 하이라이트 방지 */
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  /* iOS 스와이프 당김(바운스)으로 화면이 밀리는 것 방지 */
+  overscroll-behavior: none;
+}
+
+/* 글자 입력은 선택과 복사가 되어야 한다 */
+input,
+textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* 제시어가 바뀔 때 옆에서 밀려 들어오는 정도의 절제된 움직임 */
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateX(48px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-card-in {
+  animation: card-in 0.22s ease-out;
+}
+
+/* 카운트다운 숫자 */
+@keyframes count-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-count-pop {
+  animation: count-pop 0.5s ease-out;
+}
+
+/* 마지막 10초: 화면 테두리가 붉게 점멸 */
+@keyframes urgent-edge {
+  0%,
+  100% {
+    box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+  50% {
+    box-shadow: inset 0 0 0 18px rgba(239, 68, 68, 0.85);
+  }
+}
+
+.animate-urgent-edge {
+  animation: urgent-edge 1s ease-in-out infinite;
+}
