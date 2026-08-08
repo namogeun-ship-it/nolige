@@ -115,61 +115,62 @@ export default function PlayScreen({
         <div className="animate-urgent-edge pointer-events-none absolute inset-0 z-10 rounded-none" />
       )}
 
-      <header className="flex shrink-0 items-center gap-4 px-6 py-3">
+      <header className="flex shrink-0 items-center gap-2 overflow-hidden px-3 py-1 sm:gap-4 sm:px-6 [@media(min-height:640px)]:py-3">
         <button
           type="button"
           onClick={() => setDialog('quit')}
-          className="min-h-[60px] rounded-2xl bg-white px-5 text-base font-semibold text-slate-500 shadow-sm active:scale-95"
+          className="min-h-[52px] shrink-0 rounded-2xl bg-white px-3 text-sm font-semibold whitespace-nowrap text-slate-500 shadow-sm active:scale-95 sm:min-h-[60px] sm:px-5 sm:text-base"
         >
           나가기
         </button>
 
         <TimerRing remainingSec={game.remainingSec} totalSec={game.settings.timeLimitSec} />
 
-        <div className="min-w-0">
-          <p className="truncate text-2xl font-extrabold text-slate-800">{performer}</p>
-          <p className="text-sm font-semibold text-slate-400">
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-lg font-extrabold text-slate-800 sm:text-2xl">{performer}</p>
+          <p className="truncate text-xs font-semibold text-slate-400 sm:text-sm">
             {isRelay ? `내 몫 ${myLeft}개 남음` : `${game.turnIndex + 1}번째 차례`}
           </p>
         </div>
 
+        {/* 좁은 화면에서는 규칙을 이모지 하나로 줄인다 */}
         <span
-          className={`ml-2 shrink-0 rounded-full px-4 py-2 text-base font-bold ${
+          className={`shrink-0 rounded-full px-3 py-2 text-sm font-bold whitespace-nowrap sm:px-4 sm:text-base ${
             bodyOnly ? 'bg-purple-100 text-purple-700' : 'bg-sky-100 text-sky-700'
           }`}
         >
-          {bodyOnly ? '🙊 몸으로만' : '🗣️ 말 설명 허용'}
+          {bodyOnly ? '🙊' : '🗣️'}
+          <span className="hidden md:inline"> {bodyOnly ? '몸으로만' : '말 설명 허용'}</span>
         </span>
 
-        <div className="ml-auto flex items-center gap-4">
-          <span className="rounded-2xl bg-green-100 px-5 py-3 text-2xl font-extrabold tabular-nums text-green-700">
-            ✅ {correct}
-            {goal !== null && <span className="text-green-500"> / {goal}</span>}
-          </span>
-          {!isRelay && (
-            <button
-              type="button"
-              onClick={() => setDialog('end-turn')}
-              className="min-h-[60px] rounded-2xl bg-white px-5 text-base font-semibold text-slate-500 shadow-sm active:scale-95"
-            >
-              턴 끝내기
-            </button>
-          )}
-        </div>
+        <span className="shrink-0 rounded-2xl bg-green-100 px-3 py-2 text-xl font-extrabold tabular-nums text-green-700 sm:px-5 sm:py-3 sm:text-2xl">
+          ✅ {correct}
+          {goal !== null && <span className="text-green-500"> / {goal}</span>}
+        </span>
+
+        {!isRelay && (
+          <button
+            type="button"
+            onClick={() => setDialog('end-turn')}
+            className="hidden min-h-[52px] shrink-0 rounded-2xl bg-white px-3 text-sm font-semibold whitespace-nowrap text-slate-500 shadow-sm active:scale-95 sm:block sm:min-h-[60px] sm:px-5 sm:text-base"
+          >
+            턴 끝내기
+          </button>
+        )}
       </header>
 
-      <main className="flex min-h-0 flex-1 flex-col px-6">
+      <main className="flex min-h-0 flex-1 flex-col px-3 sm:px-6">
         {currentWord ? (
           <>
             <ScaledWord text={currentWord.text} />
             {game.settings.hintsEnabled && currentWord.hints.length > 0 && (
-              <div className="shrink-0 pb-3">
+              <div className="shrink-0 pb-1 [@media(min-height:640px)]:pb-3">
                 {showHint ? (
-                  <ul className="flex flex-wrap justify-center gap-3">
+                  <ul className="flex flex-wrap justify-center gap-2 sm:gap-3">
                     {currentWord.hints.map((h) => (
                       <li
                         key={h}
-                        className="rounded-2xl bg-amber-100 px-5 py-3 text-xl font-semibold text-amber-800"
+                        className="rounded-2xl bg-amber-100 px-4 py-2 text-base font-semibold text-amber-800 sm:px-5 sm:py-3 sm:text-xl"
                       >
                         {h}
                       </li>
@@ -180,7 +181,7 @@ export default function PlayScreen({
                     <button
                       type="button"
                       onClick={() => setShowHint(true)}
-                      className="min-h-[60px] rounded-2xl bg-amber-200 px-8 text-xl font-bold text-amber-800 active:scale-95"
+                      className="min-h-[44px] rounded-2xl bg-amber-200 px-6 text-base font-bold text-amber-800 active:scale-95 sm:text-xl [@media(min-height:640px)]:min-h-[60px] [@media(min-height:640px)]:px-8"
                     >
                       💡 힌트 보기
                     </button>
@@ -197,7 +198,8 @@ export default function PlayScreen({
         )}
       </main>
 
-      <footer className="flex shrink-0 gap-4 p-4">
+      {/* 세로가 짧은 가로 모드 휴대폰에서는 단추를 낮춰 제시어 자리를 넓힌다 */}
+      <footer className="flex shrink-0 gap-3 p-2 sm:gap-4 [@media(min-height:640px)]:p-4">
         <button
           type="button"
           onClick={() => {
@@ -205,7 +207,7 @@ export default function PlayScreen({
             onPass()
           }}
           disabled={!canPass || !currentWord}
-          className="min-h-[120px] flex-1 rounded-3xl bg-slate-300 text-4xl font-extrabold text-slate-700 shadow-lg disabled:opacity-40 active:scale-95"
+          className="min-h-[84px] flex-1 rounded-3xl bg-slate-300 text-2xl font-extrabold text-slate-700 shadow-lg disabled:opacity-40 active:scale-95 sm:text-4xl [@media(min-height:640px)]:min-h-[120px]"
         >
           패스
           <span className="mt-1 block text-lg font-bold text-slate-500">
@@ -234,7 +236,7 @@ export default function PlayScreen({
             onCorrect()
           }}
           disabled={!currentWord}
-          className="min-h-[120px] flex-[1.4] rounded-3xl bg-green-500 text-5xl font-extrabold text-white shadow-lg shadow-green-200 disabled:opacity-40 active:scale-95"
+          className="min-h-[84px] flex-[1.4] rounded-3xl bg-green-500 text-3xl font-extrabold text-white shadow-lg shadow-green-200 disabled:opacity-40 active:scale-95 sm:text-5xl [@media(min-height:640px)]:min-h-[120px]"
         >
           정답!
         </button>

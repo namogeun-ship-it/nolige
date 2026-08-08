@@ -424,8 +424,9 @@ export default function GameSetupScreen({
         </div>
       </div>
 
-      <footer className="flex shrink-0 items-center gap-4 border-t border-slate-200 bg-white px-6 py-4">
-        <p className="text-lg text-slate-500">
+      {/* 좁은 화면에서는 안내와 시작 단추를 위아래로 쌓는다 */}
+      <footer className="flex shrink-0 flex-col gap-3 border-t border-slate-200 bg-white px-4 py-3 sm:flex-row sm:items-center sm:gap-4 sm:px-6 sm:py-4">
+        <p className="text-base text-slate-500 sm:text-lg">
           {categoryIds.length === 0 ? (
             <span className="font-semibold text-red-500">주제를 하나 이상 골라 주세요</span>
           ) : availableWords === 0 ? (
@@ -450,7 +451,7 @@ export default function GameSetupScreen({
           type="button"
           onClick={handleStart}
           disabled={!canStart}
-          className="ml-auto min-h-[76px] rounded-2xl bg-green-500 px-12 text-2xl font-extrabold text-white shadow-lg shadow-green-200 disabled:bg-slate-300 disabled:shadow-none active:scale-95"
+          className="min-h-[68px] w-full shrink-0 rounded-2xl bg-green-500 px-8 text-xl font-extrabold whitespace-nowrap text-white shadow-lg shadow-green-200 disabled:bg-slate-300 disabled:shadow-none active:scale-95 sm:ml-auto sm:min-h-[76px] sm:w-auto sm:px-12 sm:text-2xl"
         >
           시작하기 →
         </button>

@@ -148,7 +148,7 @@ export default function WordsScreen({ words, categories, onChange, navigate }: P
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `몸으로말해요_제시어_${new Date().toISOString().slice(0, 10)}.json`
+    a.download = `놀이게임_제시어_${new Date().toISOString().slice(0, 10)}.json`
     a.click()
     URL.revokeObjectURL(url)
     flash('파일로 내보냈어요')
@@ -167,50 +167,54 @@ export default function WordsScreen({ words, categories, onChange, navigate }: P
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex shrink-0 flex-wrap items-center gap-3 px-6 py-4">
+      <header className="flex shrink-0 flex-wrap items-center gap-2 px-4 py-3 sm:gap-3 sm:px-6 sm:py-4">
         <button
           type="button"
           onClick={() => navigate({ name: 'home' })}
-          className="min-h-[60px] rounded-2xl bg-white px-6 text-lg font-semibold text-slate-600 shadow-sm active:scale-95"
+          className="min-h-[56px] shrink-0 rounded-2xl bg-white px-5 text-base font-semibold whitespace-nowrap text-slate-600 shadow-sm active:scale-95 sm:min-h-[60px] sm:px-6 sm:text-lg"
         >
           ← 홈
         </button>
-        <h1 className="text-3xl font-extrabold text-orange-600">제시어 관리</h1>
-        <span className="text-lg text-slate-400">모두 {words.length}개</span>
+        <h1 className="text-2xl font-extrabold whitespace-nowrap text-orange-600 sm:text-3xl">
+          제시어 관리
+        </h1>
+        <span className="text-base whitespace-nowrap text-slate-400 sm:text-lg">
+          모두 {words.length}개
+        </span>
 
-        <div className="ml-auto flex flex-wrap gap-2">
+        <div className="flex w-full gap-2 overflow-x-auto pb-1 sm:ml-auto sm:w-auto sm:flex-wrap sm:overflow-visible sm:pb-0">
           <button
             type="button"
             onClick={() => setBulkAdding(true)}
-            className="min-h-[60px] rounded-2xl bg-white px-5 text-base font-semibold text-slate-600 shadow-sm active:scale-95"
+            className="min-h-[56px] shrink-0 rounded-2xl bg-white px-4 text-sm font-semibold whitespace-nowrap text-slate-600 shadow-sm active:scale-95 sm:min-h-[60px] sm:px-5 sm:text-base"
           >
             📋 여러 개 넣기
           </button>
           <button
             type="button"
             onClick={exportJson}
-            className="min-h-[60px] rounded-2xl bg-white px-5 text-base font-semibold text-slate-600 shadow-sm active:scale-95"
+            className="min-h-[56px] shrink-0 rounded-2xl bg-white px-4 text-sm font-semibold whitespace-nowrap text-slate-600 shadow-sm active:scale-95 sm:min-h-[60px] sm:px-5 sm:text-base"
           >
             ⬆️ 내보내기
           </button>
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="min-h-[60px] rounded-2xl bg-white px-5 text-base font-semibold text-slate-600 shadow-sm active:scale-95"
+            className="min-h-[56px] shrink-0 rounded-2xl bg-white px-4 text-sm font-semibold whitespace-nowrap text-slate-600 shadow-sm active:scale-95 sm:min-h-[60px] sm:px-5 sm:text-base"
           >
             ⬇️ 가져오기
           </button>
           <button
             type="button"
             onClick={() => setResetKind('defaults')}
-            className="min-h-[60px] rounded-2xl bg-white px-5 text-base font-semibold text-slate-600 shadow-sm active:scale-95"
+            className="min-h-[56px] shrink-0 rounded-2xl bg-white px-4 text-sm font-semibold whitespace-nowrap text-slate-600 shadow-sm active:scale-95 sm:min-h-[60px] sm:px-5 sm:text-base"
           >
             ↩️ 되돌리기
           </button>
           <button
             type="button"
             onClick={() => setCreating(true)}
-            className="min-h-[60px] rounded-2xl bg-green-500 px-7 text-lg font-extrabold text-white shadow active:scale-95"
+            className="min-h-[56px] shrink-0 rounded-2xl bg-green-500 px-5 text-base font-extrabold whitespace-nowrap text-white shadow active:scale-95 sm:min-h-[60px] sm:px-7 sm:text-lg"
           >
             ＋ 제시어 추가
           </button>
@@ -228,9 +232,45 @@ export default function WordsScreen({ words, categories, onChange, navigate }: P
         />
       </header>
 
-      <div className="flex min-h-0 flex-1 gap-5 px-6 pb-6">
-        {/* 주제 목록 */}
-        <aside className="flex w-64 shrink-0 flex-col gap-2 overflow-y-auto">
+      <div className="flex min-h-0 flex-1 flex-col gap-3 px-4 pb-4 lg:flex-row lg:gap-5 lg:px-6 lg:pb-6">
+        {/* 좁은 화면: 주제를 가로로 넘겨 고른다 */}
+        <div className="flex shrink-0 gap-2 overflow-x-auto pb-1 lg:hidden">
+          {categories.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => {
+                setSelectedCategoryId(c.id)
+                setQuery('')
+              }}
+              className={`flex min-h-[60px] shrink-0 items-center gap-2 rounded-2xl px-4 text-base font-semibold whitespace-nowrap active:scale-95 ${
+                !searching && selectedCategoryId === c.id
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-white text-slate-600 shadow-sm'
+              }`}
+            >
+              <span className="text-xl">{c.emoji}</span>
+              {c.name}
+              <span
+                className={
+                  !searching && selectedCategoryId === c.id ? 'text-orange-100' : 'text-slate-400'
+                }
+              >
+                {countIn(c.id)}
+              </span>
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => setCreatingCategory(true)}
+            className="min-h-[60px] shrink-0 rounded-2xl border-2 border-dashed border-slate-300 px-4 text-base font-semibold whitespace-nowrap text-slate-400 active:scale-95"
+          >
+            ＋ 내 주제
+          </button>
+        </div>
+
+        {/* 넓은 화면: 왼쪽에 주제 목록 */}
+        <aside className="hidden w-64 shrink-0 flex-col gap-2 overflow-y-auto lg:flex">
           {categories.map((c) => (
             <button
               key={c.id}
