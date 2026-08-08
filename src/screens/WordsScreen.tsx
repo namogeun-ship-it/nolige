@@ -306,13 +306,14 @@ export default function WordsScreen({ words, categories, onChange, navigate }: P
         </aside>
 
         {/* 제시어 목록 */}
-        <main className="flex min-w-0 flex-1 flex-col rounded-3xl bg-white p-5 shadow-sm">
-          <div className="flex shrink-0 flex-wrap items-center gap-3">
+        {/* min-h-0이 없으면 세로로 쌓였을 때 목록이 줄어들지 못해 스크롤이 막힌다 */}
+        <main className="flex min-h-0 min-w-0 flex-1 flex-col rounded-3xl bg-white p-4 shadow-sm sm:p-5">
+          <div className="flex shrink-0 flex-wrap items-center gap-2 sm:gap-3">
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="제시어나 힌트로 찾기"
-              className="min-h-[60px] min-w-[220px] flex-1 rounded-2xl bg-slate-50 px-5 text-lg text-slate-700 outline-none focus:bg-white focus:ring-2 focus:ring-orange-400"
+              className="min-h-[52px] w-full rounded-2xl bg-slate-50 px-4 text-base text-slate-700 outline-none focus:bg-white focus:ring-2 focus:ring-orange-400 sm:min-h-[60px] sm:w-auto sm:min-w-[220px] sm:flex-1 sm:px-5 sm:text-lg"
             />
             {[
               { value: 'all' as DifficultyFilter, label: '전체' },
@@ -323,7 +324,7 @@ export default function WordsScreen({ words, categories, onChange, navigate }: P
                 key={String(d.value)}
                 type="button"
                 onClick={() => setDifficultyFilter(d.value)}
-                className={`min-h-[60px] rounded-2xl px-5 text-base font-semibold active:scale-95 ${
+                className={`min-h-[52px] flex-1 rounded-2xl px-4 text-sm font-semibold active:scale-95 sm:min-h-[60px] sm:flex-none sm:px-5 sm:text-base ${
                   difficultyFilter === d.value
                     ? 'bg-slate-700 text-white'
                     : 'bg-slate-100 text-slate-500'
@@ -341,19 +342,19 @@ export default function WordsScreen({ words, categories, onChange, navigate }: P
                       categories.find((c) => c.id === selectedCategoryId) ?? null,
                     )
                   }
-                  className="min-h-[60px] rounded-2xl bg-slate-100 px-5 text-base font-semibold text-slate-500 active:scale-95"
+                  className="min-h-[52px] shrink-0 rounded-2xl bg-slate-100 px-4 text-sm font-semibold whitespace-nowrap text-slate-500 active:scale-95 sm:min-h-[60px] sm:px-5 sm:text-base"
                 >
                   주제 고치기
                 </button>
               )}
           </div>
 
-          <p className="mt-3 shrink-0 text-base text-slate-400">
+          <p className="mt-2 shrink-0 text-sm text-slate-400 sm:mt-3 sm:text-base">
             {searching ? `찾은 제시어 ${visibleWords.length}개` : `${visibleWords.length}개`}
             <span className="ml-2">제시어를 누르면 고칠 수 있어요.</span>
           </p>
 
-          <div className="mt-3 min-h-0 flex-1 overflow-y-auto">
+          <div className="mt-2 min-h-0 flex-1 overflow-y-auto sm:mt-3">
             {visibleWords.length === 0 ? (
               <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
                 <p className="text-2xl font-bold text-slate-400">
