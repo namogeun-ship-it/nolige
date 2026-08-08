@@ -13,9 +13,10 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
-        name: '몸으로 말해요',
-        short_name: '몸으로말해요',
-        description: '초등학생과 함께하는 몸으로 말해요 게임 진행 도우미',
+        // 아이패드 홈 화면 아이콘에 표시될 이름
+        name: '놀이게임',
+        short_name: '놀이게임',
+        description: '아이들과 함께하는 놀이게임 진행 도우미',
         lang: 'ko',
         display: 'fullscreen',
         orientation: 'any',
