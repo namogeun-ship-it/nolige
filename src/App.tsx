@@ -35,6 +35,7 @@ import LiarTalkScreen from './screens/liar/LiarTalkScreen'
 import LiarVoteScreen from './screens/liar/LiarVoteScreen'
 import LiarTallyScreen from './screens/liar/LiarTallyScreen'
 import LiarGuessScreen from './screens/liar/LiarGuessScreen'
+import LiarInnocentScreen from './screens/liar/LiarInnocentScreen'
 import LiarResultScreen from './screens/liar/LiarResultScreen'
 import WordsScreen from './screens/WordsScreen'
 import SettingsScreen from './screens/SettingsScreen'
@@ -198,6 +199,9 @@ export default function App() {
     }
     if (state.phase === 'guess') {
       return <LiarGuessScreen game={state} onJudge={liar.judgeGuess} />
+    }
+    if (state.phase === 'innocent') {
+      return <LiarInnocentScreen game={state} onContinue={liar.continueAfterInnocent} />
     }
     return (
       <LiarResultScreen game={state} onPlayAgain={liar.playAgain} onGoHome={handleLiarQuit} />

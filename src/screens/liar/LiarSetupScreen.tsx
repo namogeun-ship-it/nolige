@@ -53,6 +53,12 @@ const WRONG_PICK_OPTIONS: { value: LiarWrongPick; label: string; description: st
     description: '시민이 엉뚱한 사람을 지목하면 그대로 판이 끝나고 라이어가 이깁니다.',
   },
   {
+    value: 'revote',
+    label: '바로 다시 지목',
+    description:
+      '설명은 더 듣지 않고 그 자리에서 한 번 더 투표합니다. 기회는 판마다 한 번뿐이고, 또 틀리면 라이어가 이깁니다.',
+  },
+  {
     value: 'extra-round',
     label: '한 바퀴 더 기회',
     description: '설명을 한 바퀴 더 돌고 다시 투표합니다. 기회는 판마다 한 번뿐이고, 또 틀리면 라이어가 이깁니다.',
@@ -62,11 +68,8 @@ const WRONG_PICK_OPTIONS: { value: LiarWrongPick; label: string; description: st
 const defaultPlayerName = (index: number) => `${index + 1}번`
 
 export default function LiarSetupScreen({ words, categories, lastSettings, onStart, onBack }: Props) {
-  const [categoryIds, setCategoryIds] = useState<string[]>(
-    () =>
-      lastSettings?.categoryIds.filter((id) => categories.some((c) => c.id === id)) ??
-      categories.map((c) => c.id),
-  )
+  // 주제는 지난 선택을 되살리지 않고 항상 빈 상태로 연다
+  const [categoryIds, setCategoryIds] = useState<string[]>([])
   const [difficulty, setDifficulty] = useState<DifficultySetting>(lastSettings?.difficulty ?? 1)
   const [playerNames, setPlayerNames] = useState<string[]>(
     () =>

@@ -65,6 +65,7 @@ function dealRound(
     liarGuessedRight: null,
     winner: null,
     extraRoundUsed: false,
+    revoteUsed: false,
     tally: base.tally,
     deck: drawn.deck,
     deckIndex: drawn.deckIndex,
@@ -237,16 +238,37 @@ export function useLiarGame(words: Word[], categories: Category[]) {
   /**
    * 라이어로 지목할 사람을 확정한다.
    * 라이어를 맞혔으면 라이어에게 제시어를 맞힐 기회를 주고,
-   * 엉뚱한 사람을 지목했으면 설정에 따라 한 바퀴를 더 돌거나 라이어가 이긴다.
+   * 엉뚱한 사람을 지목했으면 시민이었다는 것부터 알린다.
    */
   const accuse = useCallback((targetIndex: number) => {
     setGame((prev) => {
       if (!prev || (prev.phase !== 'vote' && prev.phase !== 'tally')) return prev
       const next = { ...prev, accusedIndex: targetIndex }
-      if (targetIndex === prev.liarIndex) return { ...next, phase: 'guess' }
+      return { ...next, phase: targetIndex === prev.liarIndex ? 'guess' : 'innocent' }
+    })
+  }, [])
+
+  /**
+   * 시민을 지목했다는 것을 확인한 뒤로 넘어간다.
+   * 남은 기회가 있으면 설명을 한 바퀴 더 돌고, 없으면 라이어가 이긴다.
+   */
+  const continueAfterInnocent = useCallback(() => {
+    setGame((prev) => {
+      if (!prev || prev.phase !== 'innocent') return prev
+      if (prev.settings.wrongPick === 'revote' && !prev.revoteUsed) {
+        // 설명은 더 듣지 않고 그 자리에서 한 번 더 지목한다
+        return {
+          ...prev,
+          phase: 'vote',
+          revoteUsed: true,
+          votes: prev.votes.map(() => null),
+          voteAt: 0,
+          accusedIndex: null,
+        }
+      }
       if (prev.settings.wrongPick === 'extra-round' && !prev.extraRoundUsed) {
         return {
-          ...next,
+          ...prev,
           phase: 'talk',
           extraRoundUsed: true,
           // 이미 돈 바퀴에 이어서 한 바퀴를 더 돈다
@@ -258,7 +280,7 @@ export function useLiarGame(words: Word[], categories: Category[]) {
           accusedIndex: null,
         }
       }
-      return settle(next, 'liar')
+      return settle(prev, 'liar')
     })
   }, [])
 
@@ -314,6 +336,7 @@ export function useLiarGame(words: Word[], categories: Category[]) {
     castVote,
     revote,
     accuse,
+    continueAfterInnocent,
     judgeGuess,
     playAgain,
     quitGame,

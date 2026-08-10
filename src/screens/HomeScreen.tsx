@@ -22,6 +22,8 @@ function liarProgress(state: LiarGameState): string {
       return '개표 결과'
     case 'guess':
       return '라이어의 마지막 기회'
+    case 'innocent':
+      return '지목 결과'
     default:
       return '판 결과'
   }

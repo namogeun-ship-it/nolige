@@ -131,8 +131,13 @@ export interface GameState {
 /** 투표 방식: 앱으로 한 명씩 비밀투표 / 손으로 지목하고 결과만 입력 */
 export type LiarVoteMode = 'app' | 'manual'
 
-/** 라이어가 아닌 사람을 지목했을 때 어떻게 할지 */
-export type LiarWrongPick = 'liar-wins' | 'extra-round'
+/**
+ * 라이어가 아닌 사람을 지목했을 때 어떻게 할지.
+ * liar-wins   = 그대로 라이어 승리
+ * revote      = 설명 없이 그 자리에서 한 번 더 투표
+ * extra-round = 설명을 한 바퀴 더 돌고 다시 투표
+ */
+export type LiarWrongPick = 'liar-wins' | 'revote' | 'extra-round'
 
 export interface LiarSettings {
   /** 복수 선택된 주제 id 목록 */
@@ -153,12 +158,13 @@ export interface LiarSettings {
 /**
  * reveal  = 기기를 돌려 가며 각자 제시어(또는 라이어 통보)를 확인
  * talk    = 순서대로 제시어를 설명
- * vote    = 라이어로 의심되는 사람에게 투표
- * tally   = 개표 결과 확인
- * guess   = 지목당한 라이어가 제시어를 맞혀 보는 마지막 기회
- * result  = 제시어와 라이어 공개, 승패
+ * vote     = 라이어로 의심되는 사람에게 투표
+ * tally    = 개표 결과 확인
+ * guess    = 지목당한 라이어가 제시어를 맞혀 보는 마지막 기회
+ * innocent = 지목당한 사람이 시민이었음을 알리는 화면
+ * result   = 제시어와 라이어 공개, 승패
  */
-export type LiarPhase = 'reveal' | 'talk' | 'vote' | 'tally' | 'guess' | 'result'
+export type LiarPhase = 'reveal' | 'talk' | 'vote' | 'tally' | 'guess' | 'innocent' | 'result'
 
 export interface LiarGameState {
   settings: LiarSettings
@@ -193,6 +199,8 @@ export interface LiarGameState {
   winner: 'citizens' | 'liar' | null
   /** 시민이 엉뚱한 사람을 지목해서 한 바퀴를 더 돈 적이 있는지 */
   extraRoundUsed: boolean
+  /** 설명 없이 바로 다시 지목할 기회를 이미 쓴 적이 있는지 */
+  revoteUsed: boolean
   /** 이어서 여러 판을 할 때의 누적 전적 */
   tally: { citizens: number; liar: number }
   /** 이어서 여러 판을 해도 같은 제시어가 안 나오게 섞어 둔 묶음 */

@@ -69,11 +69,9 @@ export default function GameSetupScreen({
   const saved = isTeam ? lastTeamSettings : lastRelaySettings
 
   // ── 두 모드가 함께 쓰는 설정
-  const [categoryIds, setCategoryIds] = useState<string[]>(
-    () =>
-      saved?.categoryIds.filter((id) => categories.some((c) => c.id === id)) ??
-      categories.map((c) => c.id),
-  )
+  // 주제는 지난 선택을 되살리지 않고 항상 빈 상태로 연다.
+  // 전체가 켜진 채로 시작하면 그날 하고 싶은 주제만 고르기가 번거롭다.
+  const [categoryIds, setCategoryIds] = useState<string[]>([])
   // 난이도가 3단계이던 시절에 저장된 값이 남아 있을 수 있다
   const [difficulty, setDifficulty] = useState<DifficultySetting>(() => {
     const last = saved?.difficulty

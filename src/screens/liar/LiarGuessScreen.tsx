@@ -28,7 +28,7 @@ export default function LiarGuessScreen({ game, onJudge }: Props) {
           {liarName}
         </p>
       </div>
-      <p className="max-w-3xl text-xl font-semibold text-red-100 sm:text-2xl">
+      <p className="max-w-3xl text-xl font-semibold break-keep text-red-100 sm:text-2xl">
         마지막 기회예요. {liarName} 님이 제시어가 무엇이었는지 말해 보세요. 맞히면 라이어가
         이깁니다.
       </p>
