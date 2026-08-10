@@ -105,6 +105,23 @@ export function playTimeUp(): void {
   tone({ from: 440, to: 180, duration: 0.55, volume: 0.22, type: 'sawtooth' })
 }
 
+/** 라이어 게임: 제시어를 몰래 확인할 때 나는 짧은 소리 */
+export function playPeek(): void {
+  tone({ from: 780, to: 1040, duration: 0.1, volume: 0.14 })
+}
+
+/** 라이어 게임: 정체를 밝히기 직전의 긴장감 */
+export function playSuspense(): void {
+  tone({ from: 200, to: 150, duration: 0.5, volume: 0.16, type: 'triangle' })
+  tone({ from: 300, duration: 0.3, volume: 0.1, delay: 0.4, type: 'triangle' })
+}
+
+/** 라이어 게임: 라이어가 잡혔을 때 */
+export function playBusted(): void {
+  tone({ from: 880, to: 660, duration: 0.14, volume: 0.2 })
+  tone({ from: 660, to: 440, duration: 0.3, volume: 0.2, delay: 0.14, type: 'sawtooth' })
+}
+
 /** 팀전 우승, 릴레이전 통과 */
 export function playFanfare(): void {
   const notes = [523, 659, 784, 1047]

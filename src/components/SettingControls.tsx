@@ -21,14 +21,29 @@ export function Section({
   )
 }
 
+/** 게임마다 고른 상태의 색이 다르다. 몸으로 말해요는 주황, 라이어 게임은 보라. */
+export type Tone = 'orange' | 'violet'
+
+const SELECTED_CLASS: Record<Tone, string> = {
+  orange: 'bg-orange-500 text-white shadow-sm shadow-orange-200',
+  violet: 'bg-violet-500 text-white shadow-sm shadow-violet-200',
+}
+
+const SWITCH_ON_CLASS: Record<Tone, string> = {
+  orange: 'bg-orange-500',
+  violet: 'bg-violet-500',
+}
+
 /** 눌러서 고르는 알약 모양 버튼. 터치 영역을 60px 이상으로 잡는다. */
 export function Chip({
   selected,
   onClick,
+  tone = 'orange',
   children,
 }: {
   selected: boolean
   onClick: () => void
+  tone?: Tone
   children: ReactNode
 }) {
   return (
@@ -36,9 +51,7 @@ export function Chip({
       type="button"
       onClick={onClick}
       className={`min-h-[60px] rounded-2xl px-5 text-lg font-semibold transition-colors active:scale-95 ${
-        selected
-          ? 'bg-orange-500 text-white shadow-sm shadow-orange-200'
-          : 'bg-slate-100 text-slate-600'
+        selected ? SELECTED_CLASS[tone] : 'bg-slate-100 text-slate-600'
       }`}
     >
       {children}
@@ -52,11 +65,13 @@ export function Toggle({
   onChange,
   label,
   description,
+  tone = 'orange',
 }: {
   checked: boolean
   onChange: (next: boolean) => void
   label: string
   description?: string
+  tone?: Tone
 }) {
   return (
     <button
@@ -70,7 +85,7 @@ export function Toggle({
       </span>
       <span
         className={`relative h-9 w-16 shrink-0 rounded-full transition-colors ${
-          checked ? 'bg-orange-500' : 'bg-slate-300'
+          checked ? SWITCH_ON_CLASS[tone] : 'bg-slate-300'
         }`}
       >
         <span

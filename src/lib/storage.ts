@@ -1,4 +1,4 @@
-import type { AppSettings, Category, Difficulty, GameState, Word } from '../types'
+import type { AppSettings, Category, Difficulty, GameState, LiarGameState, Word } from '../types'
 import { DEFAULT_CATEGORIES, DEFAULT_WORDS } from '../data/defaultWords'
 import { DATA_VERSION, MAX_HINTS, RECENT_MEMORY, STORAGE_KEYS } from './constants'
 
@@ -247,6 +247,31 @@ export function saveGameState(state: GameState): void {
 
 export function clearGameState(): void {
   removeRaw(STORAGE_KEYS.lastGame)
+}
+
+export function loadLiarGameState(): LiarGameState | null {
+  const stored = readJSON<LiarGameState>(STORAGE_KEYS.liarGame)
+  if (!stored || typeof stored !== 'object') return null
+  // 최소한의 형태 검사. 하나라도 어긋나면 복구를 포기한다.
+  if (
+    !stored.settings ||
+    !Array.isArray(stored.settings.playerNames) ||
+    !Array.isArray(stored.order) ||
+    !Array.isArray(stored.votes) ||
+    typeof stored.liarIndex !== 'number'
+  ) {
+    removeRaw(STORAGE_KEYS.liarGame)
+    return null
+  }
+  return stored
+}
+
+export function saveLiarGameState(state: LiarGameState): void {
+  writeJSON(STORAGE_KEYS.liarGame, state)
+}
+
+export function clearLiarGameState(): void {
+  removeRaw(STORAGE_KEYS.liarGame)
 }
 
 // ─────────────────────────────────────────────

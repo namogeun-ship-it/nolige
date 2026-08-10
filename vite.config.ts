@@ -6,6 +6,9 @@ import { VitePWA } from 'vite-plugin-pwa'
 // base './' 로 두면 GitHub Pages 서브 경로 등 어떤 정적 호스팅 경로에서도 동작한다
 export default defineConfig({
   base: './',
+  // 같은 와이파이에 있는 아이패드·휴대폰에서 개발 중인 화면을 바로 열어 보기 위해
+  // dev 서버를 로컬 주소가 아닌 랜 주소로도 연다
+  server: { host: true },
   plugins: [
     react(),
     tailwindcss(),

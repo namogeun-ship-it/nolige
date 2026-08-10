@@ -4,6 +4,7 @@ export const STORAGE_KEYS = {
   categories: 'charades.categories',
   settings: 'charades.settings',
   lastGame: 'charades.lastGame',
+  liarGame: 'charades.liarGame',
   dataVersion: 'charades.dataVersion',
   recentWords: 'charades.recentWords',
 } as const
@@ -40,6 +41,17 @@ export const DEFAULT_ROUNDS_PER_TEAM = 2
 export const MIN_PLAYERS = 2
 export const MAX_PLAYERS = 8
 export const DEFAULT_WORDS_PER_PLAYER = 3
+
+// 라이어 게임
+/** 시민 둘에 라이어 하나는 있어야 게임이 성립한다 */
+export const LIAR_MIN_PLAYERS = 3
+export const LIAR_MAX_PLAYERS = 10
+export const DEFAULT_LIAR_PLAYERS = 5
+/** 한 사람이 설명하는 시간. 0은 시간을 재지 않는다는 뜻이다 */
+export const LIAR_SPEAK_PRESETS = [0, 15, 30, 45] as const
+export const DEFAULT_LIAR_SPEAK_SEC = 30
+export const DEFAULT_LIAR_ROUNDS = 1
+export const LIAR_MAX_ROUNDS = 3
 
 // 제시어당 힌트 최대 개수
 export const MAX_HINTS = 3

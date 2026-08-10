@@ -1,6 +1,14 @@
+import type { Tone } from './SettingControls'
+
 interface Props {
   remainingSec: number
   totalSec: number
+  tone?: Tone
+}
+
+const RING_CLASS: Record<Tone, string> = {
+  orange: 'stroke-orange-500',
+  violet: 'stroke-violet-500',
 }
 
 // 아래 값은 그림 안에서 쓰는 기준 크기다.
@@ -11,7 +19,7 @@ const RADIUS = (BOX - STROKE) / 2
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 
 /** 남은 시간을 원형 게이지와 숫자로 같이 보여준다. */
-export default function TimerRing({ remainingSec, totalSec }: Props) {
+export default function TimerRing({ remainingSec, totalSec, tone = 'orange' }: Props) {
   const shown = Math.ceil(Math.max(0, remainingSec))
   const ratio = totalSec > 0 ? Math.max(0, Math.min(1, remainingSec / totalSec)) : 0
   const urgent = shown <= 10
@@ -36,7 +44,7 @@ export default function TimerRing({ remainingSec, totalSec }: Props) {
           strokeLinecap="round"
           strokeDasharray={CIRCUMFERENCE}
           strokeDashoffset={CIRCUMFERENCE * (1 - ratio)}
-          className={urgent ? 'stroke-red-500' : 'stroke-orange-500'}
+          className={urgent ? 'stroke-red-500' : RING_CLASS[tone]}
         />
       </svg>
       <span
