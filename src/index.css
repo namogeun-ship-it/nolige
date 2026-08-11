@@ -34,6 +34,8 @@ body {
   -webkit-user-select: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  /* 술래 정하기처럼 손가락을 오래 올려 두는 화면에서 길게 누르기 메뉴가 뜨지 않게 */
+  -webkit-touch-callout: none;
   /* iOS 스와이프 당김(바운스)으로 화면이 밀리는 것 방지 */
   overscroll-behavior: none;
 }

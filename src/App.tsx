@@ -37,10 +37,14 @@ import LiarTallyScreen from './screens/liar/LiarTallyScreen'
 import LiarGuessScreen from './screens/liar/LiarGuessScreen'
 import LiarInnocentScreen from './screens/liar/LiarInnocentScreen'
 import LiarResultScreen from './screens/liar/LiarResultScreen'
+import PickerScreen from './screens/PickerScreen'
 import WordsScreen from './screens/WordsScreen'
 import SettingsScreen from './screens/SettingsScreen'
 import { useWakeLock } from './hooks/useWakeLock'
 import { primeSound, setSoundEnabled } from './lib/sound'
+
+/** 술래 정하기에서 이름 칸을 처음 열었을 때 보여줄 빈 자리 */
+const DEFAULT_PICKER_NAMES = ['', '', '', '']
 
 /** 저장돼 있는 게임을 찾는다. 두 게임을 같이 저장하지는 않으므로 먼저 찾은 쪽을 쓴다. */
 function findResumable(): Resumable | null {
@@ -242,6 +246,15 @@ export default function App() {
           categories={categories}
           lastSettings={appSettings.lastLiarSettings}
           onStart={handleLiarStart}
+          onBack={() => setScreen({ name: 'home' })}
+        />
+      )}
+      {screen.name === 'picker' && (
+        <PickerScreen
+          names={appSettings.lastPickerNames ?? DEFAULT_PICKER_NAMES}
+          onNamesChange={(names) =>
+            handleAppSettingsChange({ ...appSettings, lastPickerNames: names })
+          }
           onBack={() => setScreen({ name: 'home' })}
         />
       )}

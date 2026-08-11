@@ -220,6 +220,8 @@ export interface AppSettings {
   lastTeamSettings?: TeamGameSettings
   lastRelaySettings?: RelayGameSettings
   lastLiarSettings?: LiarSettings
+  /** 술래 정하기에서 이름으로 뽑을 때 넣어 둔 이름 */
+  lastPickerNames?: string[]
 }
 
 /** 게임이 진행 중일 때는 phase가 화면을 정하고, 그 밖에는 이 값이 정한다. */
@@ -228,6 +230,7 @@ export type Screen =
   | { name: 'charades' }
   | { name: 'setup'; mode: GameMode }
   | { name: 'liar-setup' }
+  | { name: 'picker' }
   | { name: 'words' }
   | { name: 'settings' }
 

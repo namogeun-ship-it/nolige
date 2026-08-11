@@ -75,7 +75,8 @@ export default function HomeScreen({ navigate, resumable, onResume, onDiscardRes
         </div>
       )}
 
-      <main className="flex w-full max-w-3xl flex-col gap-5 sm:flex-row">
+      {/* 게임 두 개는 나란히, 술래 정하기는 그 아래에 넓게 */}
+      <main className="grid w-full max-w-3xl gap-5 sm:grid-cols-2">
         <button
           type="button"
           onClick={() => navigate({ name: 'charades' })}
@@ -94,6 +95,16 @@ export default function HomeScreen({ navigate, resumable, onResume, onDiscardRes
           🤥 라이어 게임
           <span className="mt-2 block text-base font-medium text-violet-100">
             제시어를 모르는 거짓말쟁이를 찾아요
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate({ name: 'picker' })}
+          className="rounded-3xl bg-slate-800 px-8 py-6 text-2xl font-bold text-white shadow-lg shadow-slate-300 active:scale-95 sm:col-span-2 sm:py-7 sm:text-3xl"
+        >
+          👆 술래 정하기
+          <span className="mt-2 block text-base font-medium text-slate-300">
+            손가락을 올리거나 이름을 넣어 뽑아요
           </span>
         </button>
       </main>
