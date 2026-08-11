@@ -102,9 +102,9 @@ export default function HomeScreen({ navigate, resumable, onResume, onDiscardRes
           onClick={() => navigate({ name: 'picker' })}
           className="rounded-3xl bg-slate-800 px-8 py-6 text-2xl font-bold text-white shadow-lg shadow-slate-300 active:scale-95 sm:col-span-2 sm:py-7 sm:text-3xl"
         >
-          👆 술래 정하기
+          👆 술래 정하기 · 팀 나누기
           <span className="mt-2 block text-base font-medium text-slate-300">
-            손가락을 올리거나 이름을 넣어 뽑아요
+            손가락을 올리거나 이름을 넣어 정해요
           </span>
         </button>
       </main>

@@ -1,10 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
-import { MAX_PICKER_NAMES, pickRandom } from '../../lib/picker'
+import {
+  MAX_PICKER_NAMES,
+  pickRandom,
+  splitTeams,
+  TEAMS,
+  type PickerPurpose,
+} from '../../lib/picker'
 import { playFanfare, playPeek, playTick } from '../../lib/sound'
 
 interface Props {
-  /** 몇 명을 뽑을지 */
-  pickCount: number
+  purpose: PickerPurpose
+  /** 술래 뽑기면 뽑을 인원, 팀 나누기면 팀 수 */
+  count: number
   /** 지난번에 넣어 둔 이름 */
   names: string[]
   onNamesChange: (names: string[]) => void
@@ -14,77 +21,112 @@ interface Props {
 /** 이름이 하나씩 지나가다 멈추는 시간(밀리초) */
 const SPIN_MS = 1000
 
-/** 이름을 넣어 두고 그중에서 뽑는다. 자리에 없는 사람도 넣을 수 있다. */
-export default function NamePicker({ pickCount, names, onNamesChange, onGuideChange }: Props) {
+type Result = { kind: 'pick'; picked: string[] } | { kind: 'team'; teams: string[][] }
+
+/** 이름을 넣어 두고 술래를 뽑거나 팀을 나눈다. 자리에 없는 사람도 넣을 수 있다. */
+export default function NamePicker({
+  purpose,
+  count,
+  names,
+  onNamesChange,
+  onGuideChange,
+}: Props) {
   const [spinning, setSpinning] = useState<string | null>(null)
-  const [picked, setPicked] = useState<string[] | null>(null)
+  const [result, setResult] = useState<Result | null>(null)
 
   const namesRef = useRef(names)
   namesRef.current = names
 
+  const filledNames = () => namesRef.current.map((n) => n.trim()).filter((n) => n.length > 0)
   const filled = names.map((n) => n.trim()).filter((n) => n.length > 0)
-  const enough = filled.length > pickCount
+  const enough = filled.length > count
 
   useEffect(() => {
     onGuideChange(
-      picked
-        ? '다시 뽑거나 이름을 고쳐 보세요'
+      result
+        ? '다시 하거나 이름을 고쳐 보세요'
         : !enough
-          ? `이름을 ${pickCount + 1}개 이상 넣어 주세요`
-          : `${filled.length}명 중에서 ${pickCount}명을 뽑아요`,
+          ? `이름을 ${count + 1}개 이상 넣어 주세요`
+          : purpose === 'pick'
+            ? `${filled.length}명 중에서 ${count}명을 뽑아요`
+            : `${filled.length}명을 ${count}개 팀으로 나눠요`,
     )
-  }, [picked, enough, filled.length, pickCount, onGuideChange])
+  }, [result, enough, filled.length, count, purpose, onGuideChange])
 
-  const spin = () => {
+  // 뽑을 대상이나 인원이 바뀌면 지난 결과는 지운다
+  useEffect(() => setResult(null), [purpose, count])
+
+  const run = () => {
     if (!enough || spinning !== null) return
-    setPicked(null)
+    setResult(null)
     playPeek()
     // 이름이 빠르게 지나가다 멈춘다
     const id = window.setInterval(() => {
-      const pool = namesRef.current.map((n) => n.trim()).filter((n) => n.length > 0)
+      const pool = filledNames()
       setSpinning(pool[Math.floor(Math.random() * pool.length)] ?? '')
       playTick()
     }, 80)
     window.setTimeout(() => {
       window.clearInterval(id)
       setSpinning(null)
-      const pool = namesRef.current.map((n) => n.trim()).filter((n) => n.length > 0)
-      setPicked(pickRandom(pool, pickCount))
+      const pool = filledNames()
+      setResult(
+        purpose === 'pick'
+          ? { kind: 'pick', picked: pickRandom(pool, count) }
+          : { kind: 'team', teams: splitTeams(pool, count) },
+      )
       playFanfare()
     }, SPIN_MS)
   }
 
   const setName = (index: number, value: string) => {
     onNamesChange(names.map((n, i) => (i === index ? value : n)))
-    setPicked(null)
+    setResult(null)
   }
 
   const addName = () => {
     if (names.length >= MAX_PICKER_NAMES) return
     onNamesChange([...names, ''])
-    setPicked(null)
+    setResult(null)
   }
 
   const removeName = (index: number) => {
     onNamesChange(names.filter((_, i) => i !== index))
-    setPicked(null)
+    setResult(null)
   }
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       {/* 뽑은 결과와 돌아가는 이름이 보이는 자리 */}
-      <div className="flex min-h-[128px] shrink-0 items-center justify-center px-5 sm:min-h-[180px]">
+      <div className="flex min-h-[128px] shrink-0 items-center justify-center px-4 sm:min-h-[180px] sm:px-6">
         {spinning !== null ? (
           <p className="truncate text-5xl font-extrabold text-slate-500 sm:text-7xl">{spinning}</p>
-        ) : picked ? (
+        ) : result?.kind === 'pick' ? (
           <div className="flex flex-wrap items-center justify-center gap-3">
-            {picked.map((name) => (
+            {result.picked.map((name) => (
               <p
                 key={name}
                 className="animate-count-pop rounded-3xl bg-white px-6 py-3 text-4xl font-extrabold text-slate-900 sm:px-10 sm:py-4 sm:text-6xl"
               >
                 {name}
               </p>
+            ))}
+          </div>
+        ) : result?.kind === 'team' ? (
+          <div className="grid w-full max-w-4xl gap-3 sm:grid-cols-2">
+            {result.teams.map((team, i) => (
+              <div
+                key={TEAMS[i].name}
+                style={{ backgroundColor: TEAMS[i].color }}
+                className="animate-count-pop rounded-3xl px-5 py-3 text-left"
+              >
+                <p className="text-base font-bold text-white/80">
+                  {TEAMS[i].name} · {team.length}명
+                </p>
+                <p className="text-2xl font-extrabold break-keep text-white sm:text-3xl">
+                  {team.join(', ')}
+                </p>
+              </div>
             ))}
           </div>
         ) : (
@@ -133,11 +175,11 @@ export default function NamePicker({ pickCount, names, onNamesChange, onGuideCha
       <div className="shrink-0 p-4 sm:p-6">
         <button
           type="button"
-          onClick={spin}
+          onClick={run}
           disabled={!enough || spinning !== null}
           className="min-h-[88px] w-full rounded-3xl bg-white text-3xl font-extrabold text-slate-900 disabled:bg-slate-700 disabled:text-slate-500 active:scale-95 sm:text-4xl"
         >
-          {picked ? '다시 뽑기' : '뽑기'}
+          {purpose === 'pick' ? (result ? '다시 뽑기' : '뽑기') : result ? '다시 나누기' : '팀 나누기'}
         </button>
       </div>
     </div>
