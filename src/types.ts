@@ -139,6 +139,13 @@ export type LiarVoteMode = 'app' | 'manual'
  */
 export type LiarWrongPick = 'liar-wins' | 'revote' | 'extra-round'
 
+/**
+ * 자리에 앉은 번호를 따라 돌 때 어느 쪽으로 도는지.
+ * clockwise = 번호가 커지는 쪽 (5번 다음 6번)
+ * counter   = 번호가 작아지는 쪽 (5번 다음 4번)
+ */
+export type SeatDirection = 'clockwise' | 'counter'
+
 export interface LiarSettings {
   /** 복수 선택된 주제 id 목록 */
   categoryIds: string[]
@@ -153,6 +160,8 @@ export interface LiarSettings {
   speakSec: number
   voteMode: LiarVoteMode
   wrongPick: LiarWrongPick
+  /** 자리에 앉은 번호를 따라 어느 쪽으로 돌지 */
+  seatDirection: SeatDirection
 }
 
 /**

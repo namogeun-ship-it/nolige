@@ -1,4 +1,4 @@
-import type { LiarGameState } from '../types'
+import type { LiarGameState, SeatDirection } from '../types'
 
 /**
  * 이름 뒤에 '이에요'와 '예요' 중 맞는 쪽을 붙인다.
@@ -12,16 +12,23 @@ export function isMeLabel(name: string): string {
   return `${name}${hasFinalConsonant ? '이에요' : '예요'}`
 }
 
-/** 0부터 count-1까지의 번호를 섞어서 돌려준다. 설명 순서와 라이어 뽑기에 쓴다. */
-export function shuffledOrder(count: number): number[] {
-  const out = Array.from({ length: count }, (_, i) => i)
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    const tmp = out[i]
-    out[i] = out[j]
-    out[j] = tmp
-  }
-  return out
+/**
+ * 자리에 앉은 번호를 따라 도는 순서를 만든다.
+ * 오프라인에서는 1번부터 차례로 둘러앉아 있기 마련이라,
+ * 시작하는 사람만 무작위로 정하고 그다음부터는 옆 사람으로 넘어간다.
+ * 8명이 있고 5번부터 시작하면 시계 방향은 5, 6, 7, 8, 1, 2, 3, 4가 된다.
+ */
+export function seatOrder(count: number, startIndex: number, direction: SeatDirection): number[] {
+  const step = direction === 'clockwise' ? 1 : -1
+  return Array.from(
+    { length: count },
+    (_, i) => (((startIndex + step * i) % count) + count) % count,
+  )
+}
+
+/** 누구부터 시작할지 무작위로 고른다. */
+export function randomStartIndex(count: number): number {
+  return Math.floor(Math.random() * count)
 }
 
 /** 참가자 중 한 명을 라이어로 뽑는다. */

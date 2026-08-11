@@ -22,8 +22,8 @@ export default function LiarGuessScreen({ game, onJudge }: Props) {
   }, [])
 
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-5 bg-red-500 px-5 py-6 text-center sm:gap-7 sm:px-8">
-      <p className="text-6xl sm:text-8xl">🤥</p>
+    <div className="flex h-full flex-col items-center gap-5 overflow-y-auto bg-red-500 px-5 py-6 text-center sm:gap-7 sm:px-8">
+      <p className="mt-auto text-6xl sm:text-8xl">🤥</p>
       <div>
         <p className="text-2xl font-bold text-red-100 sm:text-3xl">지목당한 사람은 라이어였어요</p>
         <p className="mt-2 max-w-full truncate text-5xl font-extrabold text-white sm:text-7xl">
@@ -38,7 +38,7 @@ export default function LiarGuessScreen({ game, onJudge }: Props) {
         제시어를 아는 사람들이 듣고 아래에서 눌러 주세요
       </p>
 
-      <div className="flex w-full max-w-3xl flex-col gap-3 sm:flex-row sm:gap-4">
+      <div className="mb-auto flex w-full max-w-3xl shrink-0 flex-col gap-3 sm:flex-row sm:gap-4">
         <button
           type="button"
           onClick={() => onJudge(false)}

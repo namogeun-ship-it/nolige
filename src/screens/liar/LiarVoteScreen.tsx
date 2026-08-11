@@ -42,8 +42,8 @@ export default function LiarVoteScreen({ game, onCastVote, onAccuse, onQuit }: P
 
   if (byApp && !ready) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-6 bg-violet-500 px-6 text-center">
-        <p className="text-2xl font-bold text-violet-100 sm:text-3xl">투표할 차례예요</p>
+      <div className="flex h-full flex-col items-center gap-6 overflow-y-auto bg-violet-500 px-6 py-5 text-center">
+        <p className="mt-auto text-2xl font-bold text-violet-100 sm:text-3xl">투표할 차례예요</p>
         <p className="max-w-full truncate text-6xl font-extrabold text-white sm:text-8xl">
           {voterName}
         </p>
@@ -57,7 +57,7 @@ export default function LiarVoteScreen({ game, onCastVote, onAccuse, onQuit }: P
         >
           내가 {isMeLabel(voterName)}
         </button>
-        <p className="text-base text-violet-200">
+        <p className="mb-auto text-base text-violet-200">
           {game.voteAt + 1} / {game.order.length}번째 투표
         </p>
       </div>
@@ -86,8 +86,13 @@ export default function LiarVoteScreen({ game, onCastVote, onAccuse, onQuit }: P
         </div>
       </header>
 
-      <main className="flex min-h-0 flex-1 items-center overflow-y-auto px-4 pb-4 sm:px-6">
-        <div className="mx-auto grid w-full max-w-4xl gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {/*
+        가운데 정렬은 items-center가 아니라 자식의 m-auto로 한다.
+        items-center로 하면 사람이 많아 목록이 화면보다 길어질 때
+        위쪽 몇 명이 잘린 채 스크롤로도 닿지 않는다.
+      */}
+      <main className="flex min-h-0 flex-1 overflow-y-auto px-4 pb-4 sm:px-6">
+        <div className="m-auto grid w-full max-w-4xl gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {game.settings.playerNames.map((name, index) => {
             // 앱 투표에서는 자기 자신을 찍을 수 없다
             const disabled = byApp && index === voter

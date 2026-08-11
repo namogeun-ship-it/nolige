@@ -5,6 +5,7 @@ import type {
   LiarSettings,
   LiarVoteMode,
   LiarWrongPick,
+  SeatDirection,
   Word,
 } from '../../types'
 import {
@@ -65,6 +66,19 @@ const WRONG_PICK_OPTIONS: { value: LiarWrongPick; label: string; description: st
   },
 ]
 
+const DIRECTION_OPTIONS: { value: SeatDirection; label: string; description: string }[] = [
+  {
+    value: 'clockwise',
+    label: '시계 방향',
+    description: '번호가 커지는 쪽으로 넘어갑니다. 5번 다음은 6번이고, 마지막 번호 다음은 1번입니다.',
+  },
+  {
+    value: 'counter',
+    label: '반시계 방향',
+    description: '번호가 작아지는 쪽으로 넘어갑니다. 5번 다음은 4번이고, 1번 다음은 마지막 번호입니다.',
+  },
+]
+
 const defaultPlayerName = (index: number) => `${index + 1}번`
 
 export default function LiarSetupScreen({ words, categories, lastSettings, onStart, onBack }: Props) {
@@ -83,6 +97,9 @@ export default function LiarSetupScreen({ words, categories, lastSettings, onSta
   const [speakSec, setSpeakSec] = useState(lastSettings?.speakSec ?? DEFAULT_LIAR_SPEAK_SEC)
   const [voteMode, setVoteMode] = useState<LiarVoteMode>(lastSettings?.voteMode ?? 'app')
   const [wrongPick, setWrongPick] = useState<LiarWrongPick>(lastSettings?.wrongPick ?? 'liar-wins')
+  const [seatDirection, setSeatDirection] = useState<SeatDirection>(
+    lastSettings?.seatDirection ?? 'clockwise',
+  )
 
   const availableWords = useMemo(
     () => countDeckSize(words, categoryIds, difficulty),
@@ -119,6 +136,7 @@ export default function LiarSetupScreen({ words, categories, lastSettings, onSta
       speakSec,
       voteMode,
       wrongPick,
+      seatDirection,
     })
   }
 
@@ -167,6 +185,36 @@ export default function LiarSetupScreen({ words, categories, lastSettings, onSta
                 />
               ))}
             </div>
+          </Section>
+
+          <Section title="말하는 순서" hint="앉은 번호를 따라 돌아요">
+            <div className="flex flex-col gap-3">
+              {DIRECTION_OPTIONS.map((d) => (
+                <button
+                  key={d.value}
+                  type="button"
+                  onClick={() => setSeatDirection(d.value)}
+                  className={`rounded-2xl px-5 py-4 text-left transition-colors active:scale-[0.98] ${
+                    seatDirection === d.value
+                      ? 'bg-violet-500 text-white shadow-sm shadow-violet-200'
+                      : 'bg-slate-100 text-slate-600'
+                  }`}
+                >
+                  <span className="block text-lg font-bold">{d.label}</span>
+                  <span
+                    className={`mt-1 block text-sm ${
+                      seatDirection === d.value ? 'text-violet-100' : 'text-slate-400'
+                    }`}
+                  >
+                    {d.description}
+                  </span>
+                </button>
+              ))}
+            </div>
+            <p className="mt-3 text-sm text-slate-400">
+              둘러앉은 자리대로 번호를 정해 두세요. 판마다 시작하는 사람만 무작위로 바뀌고, 그
+              뒤로는 옆 사람에게 차례로 넘어갑니다. 제시어를 확인할 때도 같은 순서로 돕니다.
+            </p>
           </Section>
 
           <Section title="주제 고르기" hint="여러 개 고를 수 있어요">

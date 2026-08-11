@@ -25,8 +25,8 @@ export default function LiarInnocentScreen({ game, onContinue }: Props) {
   }, [])
 
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-5 bg-amber-500 px-5 py-6 text-center sm:gap-7 sm:px-8">
-      <p className="text-6xl sm:text-8xl">🙅</p>
+    <div className="flex h-full flex-col items-center gap-5 overflow-y-auto bg-amber-500 px-5 py-6 text-center sm:gap-7 sm:px-8">
+      <p className="mt-auto text-6xl sm:text-8xl">🙅</p>
       <div className="max-w-3xl">
         <p className="max-w-full truncate text-5xl font-extrabold text-white sm:text-7xl">{name}</p>
         <p className="mt-3 text-3xl leading-tight font-extrabold break-keep text-white sm:text-5xl">
@@ -44,7 +44,7 @@ export default function LiarInnocentScreen({ game, onContinue }: Props) {
       <button
         type="button"
         onClick={onContinue}
-        className="min-h-[88px] w-full max-w-3xl rounded-3xl bg-white px-8 text-2xl font-extrabold text-amber-700 shadow-lg active:scale-95 sm:text-3xl"
+        className="mb-auto min-h-[88px] w-full max-w-3xl shrink-0 rounded-3xl bg-white px-8 text-2xl font-extrabold text-amber-700 shadow-lg active:scale-95 sm:text-3xl"
       >
         {canRevote ? '다시 지목하기 →' : canTalkAgain ? '한 바퀴 더 돌기 →' : '결과 보기 →'}
       </button>

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Category, LiarGameState, LiarSettings, Word } from '../types'
 import { buildDeck } from '../lib/wordPool'
-import { pickLiarIndex, shuffledOrder, totalRounds } from '../lib/liar'
+import { pickLiarIndex, randomStartIndex, seatOrder, totalRounds } from '../lib/liar'
 import {
   clearLiarGameState,
   loadRecentWordIds,
@@ -54,7 +54,8 @@ function dealRound(
     wordText: drawn.word.text,
     categoryName: categories.find((c) => c.id === drawn.word?.categoryId)?.name ?? '기타',
     liarIndex: pickLiarIndex(count),
-    order: shuffledOrder(count),
+    // 시작하는 사람만 무작위로 정하고, 그다음부터는 앉은 번호를 따라 옆으로 넘어간다
+    order: seatOrder(count, randomStartIndex(count), settings.seatDirection ?? 'clockwise'),
     revealedCount: 0,
     round: 1,
     speakAt: 0,

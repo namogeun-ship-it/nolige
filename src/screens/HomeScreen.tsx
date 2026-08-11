@@ -42,9 +42,11 @@ export default function HomeScreen({ navigate, resumable, onResume, onDiscardRes
           return `몸으로 말해요 · ${modeName} · ${state.turnIndex + 1}/${totalTurns(state)}번째 차례 (${performer})`
         })()
 
+  // 가운데 정렬은 justify-center가 아니라 위아래 끝의 mt-auto·mb-auto로 한다.
+  // justify-center로 하면 화면이 작아 내용이 넘칠 때 위아래가 잘린 채 스크롤로도 닿지 않는다.
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-6 overflow-y-auto p-5 sm:gap-8 sm:p-8">
-      <header className="text-center">
+    <div className="flex h-full flex-col items-center gap-6 overflow-y-auto p-5 sm:gap-8 sm:p-8">
+      <header className="mt-auto text-center">
         <div className="text-6xl">🎲</div>
         <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-slate-800 sm:text-5xl">
           놀이게임
@@ -109,7 +111,7 @@ export default function HomeScreen({ navigate, resumable, onResume, onDiscardRes
         </button>
       </main>
 
-      <footer className="flex gap-4">
+      <footer className="mb-auto flex gap-4">
         <button
           type="button"
           onClick={() => navigate({ name: 'words' })}

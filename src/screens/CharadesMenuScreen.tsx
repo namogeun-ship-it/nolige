@@ -20,11 +20,12 @@ export default function CharadesMenuScreen({ navigate, onBack }: Props) {
         <h1 className="text-3xl font-extrabold text-orange-600">몸으로 말해요</h1>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-6 overflow-y-auto p-5 sm:gap-8 sm:p-8">
-        <p className="text-center text-lg text-slate-500">
+      {/* 가운데 정렬은 mt-auto·mb-auto로 한다. justify-center는 내용이 넘칠 때 위가 잘린다 */}
+      <div className="flex min-h-0 flex-1 flex-col items-center gap-6 overflow-y-auto p-5 sm:gap-8 sm:p-8">
+        <p className="mt-auto text-center text-lg text-slate-500">
           화면의 제시어를 몸짓이나 말로 설명해요. 어떻게 겨룰까요?
         </p>
-        <main className="flex w-full max-w-3xl flex-col gap-5 sm:flex-row">
+        <main className="mb-auto flex w-full max-w-3xl flex-col gap-5 sm:flex-row">
           <button
             type="button"
             onClick={() => navigate({ name: 'setup', mode: 'team' })}
