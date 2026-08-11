@@ -4,6 +4,7 @@ import { currentSpeaker, speechNumber, totalRounds, totalSpeeches } from '../../
 import TimerRing from '../../components/TimerRing'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import { playTick, playTimeUp } from '../../lib/sound'
+import { useEdgeColor } from '../../hooks/useEdgeColor'
 
 interface Props {
   game: LiarGameState
@@ -15,6 +16,7 @@ interface Props {
 
 /** 순서대로 제시어를 설명하는 화면. 지금 누구 차례인지와 남은 시간만 크게 보여준다. */
 export default function LiarTalkScreen({ game, onNext, onPrev, onSkipToVote, onQuit }: Props) {
+  useEdgeColor('var(--color-violet-50)')
   const [dialog, setDialog] = useState<'quit' | 'skip' | null>(null)
 
   const timed = game.settings.speakSec > 0

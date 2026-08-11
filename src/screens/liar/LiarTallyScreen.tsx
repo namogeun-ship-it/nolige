@@ -1,5 +1,6 @@
 import type { LiarGameState } from '../../types'
 import { countVotes, topVoted } from '../../lib/liar'
+import { useEdgeColor } from '../../hooks/useEdgeColor'
 
 interface Props {
   game: LiarGameState
@@ -9,6 +10,7 @@ interface Props {
 
 /** 앱 비밀투표를 개표하는 화면. 표가 갈리면 다시 투표할 수 있다. */
 export default function LiarTallyScreen({ game, onAccuse, onRevote }: Props) {
+  useEdgeColor('var(--color-violet-50)')
   const rows = countVotes(game).filter((r) => r.votes > 0)
   const top = topVoted(game)
   const tied = top.length > 1

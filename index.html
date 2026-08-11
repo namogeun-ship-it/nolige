@@ -7,10 +7,15 @@
     <!-- iPad 홈 화면 추가 시 전체화면(사파리 UI 없는) 실행 -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!--
+      상태 표시줄 자리를 비워 둔다. black-translucent로 두면 화면이 시계·다이내믹 아일랜드
+      아래까지 올라가서 아이폰에서 나가기 단추가 가려진다.
+    -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="놀이게임" />
     <meta name="theme-color" content="#f97316" />
-    <!-- viewport-fit=cover: 노치/홈바 영역까지 사용, user-scalable=no: 게임 중 실수 확대 방지 -->
+    <!-- viewport-fit=cover: 홈바 영역까지 배경을 채우고, 안전 영역은 CSS에서 띄운다.
+         user-scalable=no: 게임 중 실수 확대 방지 -->
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no"

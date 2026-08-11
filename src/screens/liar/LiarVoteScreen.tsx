@@ -3,6 +3,7 @@ import type { LiarGameState } from '../../types'
 import { currentVoter, isMeLabel } from '../../lib/liar'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import { playPeek } from '../../lib/sound'
+import { useEdgeColor } from '../../hooks/useEdgeColor'
 
 interface Props {
   game: LiarGameState
@@ -21,6 +22,9 @@ export default function LiarVoteScreen({ game, onCastVote, onAccuse, onQuit }: P
   const [ready, setReady] = useState(!byApp)
   const [pending, setPending] = useState<number | null>(null)
   const [quitting, setQuitting] = useState(false)
+
+  // 넘겨받기 화면만 배경이 진하다
+  useEdgeColor(byApp && !ready ? 'var(--color-violet-500)' : 'var(--color-violet-50)')
 
   const voter = currentVoter(game)
   const voterName = game.settings.playerNames[voter] ?? '참가자'

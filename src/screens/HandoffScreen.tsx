@@ -7,6 +7,7 @@ import {
   relayGoal,
 } from '../lib/score'
 import { formatDuration } from '../lib/score'
+import { useEdgeColor } from '../hooks/useEdgeColor'
 
 interface Props {
   game: GameState
@@ -18,6 +19,7 @@ interface Props {
  * 넘기는 시간까지 재면 억울하니 이 화면에서는 시간이 멈춘다.
  */
 export default function HandoffScreen({ game, onReady }: Props) {
+  useEdgeColor('var(--color-sky-500)')
   const names = performerNames(game)
   const currentIndex = game.turns[game.turnIndex]?.performerIndex ?? 0
   const nextIndex = nextPerformerIndex(game, currentIndex) ?? currentIndex

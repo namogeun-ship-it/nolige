@@ -3,6 +3,7 @@ import type { LiarGameState } from '../../types'
 import ScaledWord from '../../components/ScaledWord'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import { playPeek } from '../../lib/sound'
+import { useEdgeColor } from '../../hooks/useEdgeColor'
 
 interface Props {
   game: LiarGameState
@@ -15,6 +16,7 @@ interface Props {
  * 옆 사람이 넘겨다보지 못하도록 화면을 꾹 누르고 있는 동안에만 보여준다.
  */
 export default function LiarRevealScreen({ game, onDone, onQuit }: Props) {
+  useEdgeColor('var(--color-violet-50)')
   const [holding, setHolding] = useState(false)
   const [seen, setSeen] = useState(false)
   const [quitting, setQuitting] = useState(false)

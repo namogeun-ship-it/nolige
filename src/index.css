@@ -12,6 +12,18 @@ body,
   height: 100%;
 }
 
+/*
+  노치·다이내믹 아일랜드·홈바에 단추가 가리지 않도록 화면 가장자리를 띄운다.
+  상태 표시줄이 자기 자리를 차지하는 기기에서는 위쪽 값이 0이라 아무 변화가 없고,
+  홈 화면에 이미 설치해 둔 앱처럼 화면 끝까지 그리는 경우에만 그만큼 안으로 들어온다.
+*/
+#root {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
 body {
   margin: 0;
   font-family: var(--font-sans);

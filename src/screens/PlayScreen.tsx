@@ -13,6 +13,7 @@ import ScaledWord from '../components/ScaledWord'
 import TimerRing from '../components/TimerRing'
 import ConfirmDialog from '../components/ConfirmDialog'
 import { playCorrect, playCountdown, playPass, playStart, playTick } from '../lib/sound'
+import { useEdgeColor } from '../hooks/useEdgeColor'
 
 interface Props {
   game: GameState
@@ -38,6 +39,16 @@ export default function PlayScreen({
   const [dialog, setDialog] = useState<'quit' | 'end-turn' | null>(null)
 
   const isRelay = game.settings.mode === 'relay'
+
+  // 카운트다운 화면만 배경이 진하다. 나머지는 기본 배경색을 그대로 쓴다
+  useEdgeColor(
+    game.phase === 'countdown'
+      ? isRelay
+        ? 'var(--color-sky-500)'
+        : 'var(--color-orange-500)'
+      : '',
+  )
+
   const turn = game.turns[game.turnIndex]
   const names = performerNames(game)
   const performer = names[turn?.performerIndex ?? 0] ?? '설명자'

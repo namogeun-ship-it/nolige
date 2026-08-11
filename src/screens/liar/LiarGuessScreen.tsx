@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import type { LiarGameState } from '../../types'
 import { playSuspense } from '../../lib/sound'
+import { useEdgeColor } from '../../hooks/useEdgeColor'
 
 interface Props {
   game: LiarGameState
@@ -13,6 +14,7 @@ interface Props {
  * 제시어를 아는 시민들이 듣고 맞았는지 눌러 준다. 화면에는 제시어를 띄우지 않는다.
  */
 export default function LiarGuessScreen({ game, onJudge }: Props) {
+  useEdgeColor('var(--color-red-500)')
   const liarName = game.settings.playerNames[game.liarIndex] ?? '라이어'
 
   useEffect(() => {

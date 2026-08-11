@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import type { LiarGameState } from '../../types'
 import { playSuspense } from '../../lib/sound'
+import { useEdgeColor } from '../../hooks/useEdgeColor'
 
 interface Props {
   game: LiarGameState
@@ -13,6 +14,7 @@ interface Props {
  * 아직 라이어가 누구인지는 밝히지 않는다. 한 바퀴를 더 돌 수도 있기 때문이다.
  */
 export default function LiarInnocentScreen({ game, onContinue }: Props) {
+  useEdgeColor('var(--color-amber-500)')
   const name = game.accusedIndex !== null ? game.settings.playerNames[game.accusedIndex] : '이 사람'
   // 한 번 더 찾아볼 기회가 남아 있는지, 남았다면 설명을 더 듣는지 바로 다시 지목하는지
   const canRevote = game.settings.wrongPick === 'revote' && !game.revoteUsed
