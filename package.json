@@ -9,6 +9,7 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "check:words": "jiti scripts/check-words.mjs",
+    "check:bomb": "jiti scripts/check-bomb.mjs",
     "check:one": "jiti scripts/check-one.mjs",
     "check:game": "jiti scripts/check-game.mjs",
     "check:repeat": "jiti scripts/check-repeat-games.mjs"

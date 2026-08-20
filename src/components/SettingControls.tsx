@@ -21,17 +21,19 @@ export function Section({
   )
 }
 
-/** 게임마다 고른 상태의 색이 다르다. 몸으로 말해요는 주황, 라이어 게임은 보라. */
-export type Tone = 'orange' | 'violet'
+/** 게임마다 고른 상태의 색이 다르다. 몸으로 말해요는 주황, 라이어 게임은 보라, 폭탄 돌리기는 빨강. */
+export type Tone = 'orange' | 'violet' | 'red'
 
 const SELECTED_CLASS: Record<Tone, string> = {
   orange: 'bg-orange-500 text-white shadow-sm shadow-orange-200',
   violet: 'bg-violet-500 text-white shadow-sm shadow-violet-200',
+  red: 'bg-red-500 text-white shadow-sm shadow-red-200',
 }
 
 const SWITCH_ON_CLASS: Record<Tone, string> = {
   orange: 'bg-orange-500',
   violet: 'bg-violet-500',
+  red: 'bg-red-500',
 }
 
 /** 눌러서 고르는 알약 모양 버튼. 터치 영역을 60px 이상으로 잡는다. */

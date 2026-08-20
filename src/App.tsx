@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type {
   AppSettings,
+  BombSettings,
   Category,
   GameSettings,
   LiarSettings,
@@ -9,9 +10,11 @@ import type {
   Word,
 } from './types'
 import {
+  clearBombGameState,
   clearGameState,
   clearLiarGameState,
   loadAppSettings,
+  loadBombGameState,
   loadCategories,
   loadGameState,
   loadLiarGameState,
@@ -22,6 +25,7 @@ import {
 } from './lib/storage'
 import { useGame } from './hooks/useGame'
 import { useLiarGame } from './hooks/useLiarGame'
+import { useBombGame } from './hooks/useBombGame'
 import HomeScreen from './screens/HomeScreen'
 import CharadesMenuScreen from './screens/CharadesMenuScreen'
 import GameSetupScreen from './screens/GameSetupScreen'
@@ -37,6 +41,9 @@ import LiarTallyScreen from './screens/liar/LiarTallyScreen'
 import LiarGuessScreen from './screens/liar/LiarGuessScreen'
 import LiarInnocentScreen from './screens/liar/LiarInnocentScreen'
 import LiarResultScreen from './screens/liar/LiarResultScreen'
+import BombSetupScreen from './screens/bomb/BombSetupScreen'
+import BombPlayScreen from './screens/bomb/BombPlayScreen'
+import BombBoomScreen from './screens/bomb/BombBoomScreen'
 import PickerScreen from './screens/PickerScreen'
 import WordsScreen from './screens/WordsScreen'
 import SettingsScreen from './screens/SettingsScreen'
@@ -46,12 +53,14 @@ import { primeSound, setSoundEnabled } from './lib/sound'
 /** 술래 정하기에서 이름 칸을 처음 열었을 때 보여줄 빈 자리 */
 const DEFAULT_PICKER_NAMES = ['', '', '', '']
 
-/** 저장돼 있는 게임을 찾는다. 두 게임을 같이 저장하지는 않으므로 먼저 찾은 쪽을 쓴다. */
+/** 저장돼 있는 게임을 찾는다. 여러 게임을 같이 저장하지는 않으므로 먼저 찾은 쪽을 쓴다. */
 function findResumable(): Resumable | null {
   const charades = loadGameState()
   if (charades) return { kind: 'charades', state: charades }
   const liar = loadLiarGameState()
-  return liar ? { kind: 'liar', state: liar } : null
+  if (liar) return { kind: 'liar', state: liar }
+  const bomb = loadBombGameState()
+  return bomb ? { kind: 'bomb', state: bomb } : null
 }
 
 // 외부 라우터 없이 useState 기반 화면 전환.
@@ -67,9 +76,10 @@ export default function App() {
 
   const game = useGame(words)
   const liar = useLiarGame(words, categories)
+  const bomb = useBombGame()
 
   // 게임 중에는 화면이 꺼지지 않게 붙잡아 둔다
-  useWakeLock(game.game !== null || liar.game !== null)
+  useWakeLock(game.game !== null || liar.game !== null || bomb.game !== null)
 
   // 사파리는 화면을 한 번 만져야 소리를 낼 수 있어서, 첫 터치 때 오디오를 깨운다
   useEffect(() => {
@@ -88,6 +98,7 @@ export default function App() {
     setResumable(null)
     // 하던 게임은 하나만 남긴다. 다른 게임을 시작하면 그쪽 저장본은 지운다
     clearLiarGameState()
+    clearBombGameState()
     const next: AppSettings =
       settings.mode === 'team'
         ? { ...appSettings, lastTeamSettings: settings }
@@ -100,10 +111,21 @@ export default function App() {
   const handleLiarStart = (settings: LiarSettings) => {
     setResumable(null)
     clearGameState()
+    clearBombGameState()
     const next: AppSettings = { ...appSettings, lastLiarSettings: settings }
     setAppSettings(next)
     saveAppSettings(next)
     liar.startGame(settings)
+  }
+
+  const handleBombStart = (settings: BombSettings) => {
+    setResumable(null)
+    clearGameState()
+    clearLiarGameState()
+    const next: AppSettings = { ...appSettings, lastBombSettings: settings }
+    setAppSettings(next)
+    saveAppSettings(next)
+    bomb.startGame(settings)
   }
 
   /** 제시어 관리 화면에서 목록이 바뀌면 바로 저장한다 */
@@ -117,7 +139,8 @@ export default function App() {
   const handleResume = () => {
     if (!resumable) return
     if (resumable.kind === 'charades') game.resumeGame(resumable.state)
-    else liar.resumeGame(resumable.state)
+    else if (resumable.kind === 'liar') liar.resumeGame(resumable.state)
+    else bomb.resumeGame(resumable.state)
     setResumable(null)
   }
 
@@ -129,6 +152,12 @@ export default function App() {
 
   const handleLiarQuit = () => {
     liar.quitGame()
+    setResumable(null)
+    setScreen({ name: 'home' })
+  }
+
+  const handleBombQuit = () => {
+    bomb.quitGame()
     setResumable(null)
     setScreen({ name: 'home' })
   }
@@ -212,6 +241,16 @@ export default function App() {
     )
   }
 
+  if (bomb.game) {
+    const state = bomb.game
+    if (state.phase === 'boom') {
+      return <BombBoomScreen game={state} onNextRound={bomb.nextRound} onQuit={handleBombQuit} />
+    }
+    return (
+      <BombPlayScreen game={state} onBeginPlaying={bomb.beginPlaying} onQuit={handleBombQuit} />
+    )
+  }
+
   return (
     <div className="h-full overflow-hidden">
       {screen.name === 'home' && (
@@ -223,6 +262,7 @@ export default function App() {
             setResumable(null)
             clearGameState()
             clearLiarGameState()
+            clearBombGameState()
           }}
         />
       )}
@@ -246,6 +286,13 @@ export default function App() {
           categories={categories}
           lastSettings={appSettings.lastLiarSettings}
           onStart={handleLiarStart}
+          onBack={() => setScreen({ name: 'home' })}
+        />
+      )}
+      {screen.name === 'bomb-setup' && (
+        <BombSetupScreen
+          lastSettings={appSettings.lastBombSettings}
+          onStart={handleBombStart}
           onBack={() => setScreen({ name: 'home' })}
         />
       )}

@@ -26,8 +26,12 @@ export interface Category {
 // 게임 설정
 // ─────────────────────────────────────────────
 
-/** 앱에 들어 있는 게임 종류. 둘 다 같은 제시어 데이터를 쓴다. */
-export type GameKind = 'charades' | 'liar'
+/**
+ * 앱에 들어 있는 게임 종류.
+ * charades·liar 는 같은 제시어 데이터를 함께 쓰고,
+ * bomb 은 답이 여럿인 조건을 내는 게임이라 전용 데이터를 쓴다.
+ */
+export type GameKind = 'charades' | 'liar' | 'bomb'
 
 export type GameMode = 'team' | 'relay'
 
@@ -220,6 +224,69 @@ export interface LiarGameState {
 }
 
 // ─────────────────────────────────────────────
+// 폭탄 돌리기
+// 기기 하나를 옆 사람에게 넘기며 조건에 맞는 말을 대다가,
+// 언제 터질지 모르는 폭탄이 손에 있을 때 터지면 진다.
+//
+// 아이들이 말할 때마다 단추를 누르게 하지 않으려고 넘기기 조작을 두지 않았다.
+// 그래서 앱은 지금 누가 들고 있는지 모르고, 터진 사람도 아이들이 서로 보고 안다.
+// 낱말 하나를 뽑는 게임이 아니라 답이 여럿인 조건을 내는 게임이라
+// 제시어 데이터를 쓰지 않고 전용 초성·주제 데이터를 쓴다.
+// ─────────────────────────────────────────────
+
+/** 무엇을 낼지. chosung=두 글자 초성, topic=말놀이 주제, mix=둘을 섞어서 */
+export type BombTopicKind = 'chosung' | 'topic' | 'mix'
+
+export interface BombSettings {
+  topicKind: BombTopicKind
+  /**
+   * 힌트를 보여줄지. 이 놀이에서는 이것이 곧 난이도다.
+   *
+   * 어떤 문제가 쉽고 어려운지는 아이마다 갈린다. 공룡을 좋아하는 아이에게
+   * "공룡 이름"은 쉬운 문제고 관심 없는 아이에게는 두 개에서 막히는 문제다.
+   * 그래서 문제를 난이도별로 나누지 않고, 막혔을 때 예시를 보여 줄지 말지로 정한다.
+   */
+  hintsEnabled: boolean
+  /** 폭탄이 터지기까지 걸리는 시간의 최소·최대. 이 사이에서 판마다 무작위로 정해진다 */
+  minSec: number
+  maxSec: number
+  /** 터지기 직전에 째깍 소리가 빨라질지. 끄면 끝까지 일정해서 눈치챌 수 없다 */
+  hurryUp: boolean
+}
+
+/** 화면 한가운데 크게 나오는 이번 문제 */
+export interface BombTopic {
+  kind: 'chosung' | 'topic'
+  /** 초성이면 'ㄱㅅ', 주제면 '동물 이름' */
+  label: string
+  /** 이 문제의 답 스무 개. 힌트를 켠 판에서 앞의 몇 개를 보여준다 */
+  answers: string[]
+}
+
+/**
+ * countdown = 3-2-1 뒤에 폭탄이 돌기 시작한다
+ * playing   = 폭탄이 돌고 있다. 남은 시간은 화면에 보여주지 않는다
+ * boom      = 터졌다
+ */
+export type BombPhase = 'countdown' | 'playing' | 'boom'
+
+export interface BombGameState {
+  settings: BombSettings
+  phase: BombPhase
+  /** 몇 번째 판인지 (1부터) */
+  round: number
+  topic: BombTopic
+  /**
+   * 이번 판 폭탄이 터지기까지의 전체 시간(초).
+   * 화면에는 절대 보여주지 않는다. 소리를 빠르게 할 시점을 계산하는 데만 쓴다.
+   */
+  fuseSec: number
+  remainingSec: number
+  /** 이 자리에서 이미 나온 문제. 같은 문제가 연달아 나오지 않게 한다 */
+  usedLabels: string[]
+}
+
+// ─────────────────────────────────────────────
 // 앱 전역 설정 + 화면 라우팅
 // ─────────────────────────────────────────────
 
@@ -229,6 +296,7 @@ export interface AppSettings {
   lastTeamSettings?: TeamGameSettings
   lastRelaySettings?: RelayGameSettings
   lastLiarSettings?: LiarSettings
+  lastBombSettings?: BombSettings
   /** 술래 정하기에서 이름으로 뽑을 때 넣어 둔 이름 */
   lastPickerNames?: string[]
 }
@@ -239,11 +307,13 @@ export type Screen =
   | { name: 'charades' }
   | { name: 'setup'; mode: GameMode }
   | { name: 'liar-setup' }
+  | { name: 'bomb-setup' }
   | { name: 'picker' }
   | { name: 'words' }
   | { name: 'settings' }
 
-/** 하던 게임 이어서 하기. 두 게임 중 나중에 한 쪽만 남는다. */
+/** 하던 게임 이어서 하기. 여러 게임 중 나중에 한 쪽만 남는다. */
 export type Resumable =
   | { kind: 'charades'; state: GameState }
   | { kind: 'liar'; state: LiarGameState }
+  | { kind: 'bomb'; state: BombGameState }

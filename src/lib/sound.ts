@@ -127,3 +127,20 @@ export function playFanfare(): void {
   const notes = [523, 659, 784, 1047]
   notes.forEach((hz, i) => tone({ from: hz, duration: 0.18, volume: 0.18, delay: i * 0.13 }))
 }
+
+/** 폭탄 돌리기: 심지 타는 째깍 소리. 짧고 마른 소리라 말소리를 가리지 않는다 */
+export function playFuseTick(): void {
+  tone({ from: 1400, to: 900, duration: 0.035, volume: 0.09, type: 'square' })
+}
+
+/** 폭탄 돌리기: 옆 사람에게 넘길 때 */
+export function playHandoff(): void {
+  tone({ from: 520, to: 780, duration: 0.08, volume: 0.14, type: 'triangle' })
+}
+
+/** 폭탄 돌리기: 터졌다. 낮게 깔리는 소리를 여러 겹 쌓아 쿵 하고 터지게 만든다 */
+export function playBoom(): void {
+  tone({ from: 320, to: 40, duration: 0.7, volume: 0.28, type: 'sawtooth' })
+  tone({ from: 180, to: 30, duration: 0.9, volume: 0.24, type: 'square' })
+  tone({ from: 900, to: 60, duration: 0.35, volume: 0.18, type: 'triangle' })
+}

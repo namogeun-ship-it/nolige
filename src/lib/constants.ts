@@ -6,6 +6,7 @@ export const STORAGE_KEYS = {
   lastGame: 'charades.lastGame',
   liarGame: 'charades.liarGame',
   dataVersion: 'charades.dataVersion',
+  bombGame: 'charades.bombGame',
   recentWords: 'charades.recentWords',
 } as const
 
@@ -52,6 +53,23 @@ export const LIAR_SPEAK_PRESETS = [0, 15, 30, 45] as const
 export const DEFAULT_LIAR_SPEAK_SEC = 30
 export const DEFAULT_LIAR_ROUNDS = 1
 export const LIAR_MAX_ROUNDS = 3
+
+// 폭탄 돌리기
+/**
+ * 폭탄이 터지기까지의 시간 범위. 판마다 이 사이에서 무작위로 정해진다.
+ * 폭이 좁으면 언제쯤 터질지 짐작이 되고, 넓으면 끝까지 알 수 없다.
+ */
+export const BOMB_FUSE_PRESETS = [
+  { label: '짧게', minSec: 15, maxSec: 35 },
+  { label: '보통', minSec: 30, maxSec: 60 },
+  { label: '길게', minSec: 45, maxSec: 90 },
+  { label: '아주 길게', minSec: 60, maxSec: 150 },
+] as const
+
+export const DEFAULT_BOMB_FUSE = BOMB_FUSE_PRESETS[1]
+
+/** 마지막 이만큼이 남으면 째깍 소리가 빨라진다 (전체 시간에 대한 비율) */
+export const BOMB_HURRY_RATIO = 0.25
 
 // 제시어당 힌트 최대 개수
 export const MAX_HINTS = 3

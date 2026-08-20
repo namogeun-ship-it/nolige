@@ -1,4 +1,12 @@
-import type { AppSettings, Category, Difficulty, GameState, LiarGameState, Word } from '../types'
+import type {
+  AppSettings,
+  BombGameState,
+  Category,
+  Difficulty,
+  GameState,
+  LiarGameState,
+  Word,
+} from '../types'
 import { DEFAULT_CATEGORIES, DEFAULT_WORDS } from '../data/defaultWords'
 import { DATA_VERSION, MAX_HINTS, RECENT_MEMORY, STORAGE_KEYS } from './constants'
 
@@ -272,6 +280,33 @@ export function saveLiarGameState(state: LiarGameState): void {
 
 export function clearLiarGameState(): void {
   removeRaw(STORAGE_KEYS.liarGame)
+}
+
+export function loadBombGameState(): BombGameState | null {
+  const stored = readJSON<BombGameState>(STORAGE_KEYS.bombGame)
+  if (!stored || typeof stored !== 'object') return null
+  // 최소한의 형태 검사. 하나라도 어긋나면 복구를 포기한다.
+  if (
+    !stored.settings ||
+    !stored.topic ||
+    typeof stored.topic.label !== 'string' ||
+    // 힌트 데이터의 모양이 바뀌기 전에 저장된 게임은 되살리지 않는다
+    !Array.isArray(stored.topic.answers) ||
+    typeof stored.round !== 'number' ||
+    typeof stored.fuseSec !== 'number'
+  ) {
+    removeRaw(STORAGE_KEYS.bombGame)
+    return null
+  }
+  return stored
+}
+
+export function saveBombGameState(state: BombGameState): void {
+  writeJSON(STORAGE_KEYS.bombGame, state)
+}
+
+export function clearBombGameState(): void {
+  removeRaw(STORAGE_KEYS.bombGame)
 }
 
 // ─────────────────────────────────────────────

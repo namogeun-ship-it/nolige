@@ -34,6 +34,9 @@ jobs:
       - name: 제시어 데이터 점검
         run: npm run check:words
 
+      - name: 폭탄 돌리기 데이터 점검
+        run: npm run check:bomb
+
       - name: 빌드
         run: npm run build
 

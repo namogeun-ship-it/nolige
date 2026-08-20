@@ -9,6 +9,7 @@ interface Props {
 const RING_CLASS: Record<Tone, string> = {
   orange: 'stroke-orange-500',
   violet: 'stroke-violet-500',
+  red: 'stroke-red-500',
 }
 
 // 아래 값은 그림 안에서 쓰는 기준 크기다.

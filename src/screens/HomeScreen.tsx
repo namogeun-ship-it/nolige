@@ -1,4 +1,4 @@
-import type { LiarGameState, Resumable, Screen } from '../types'
+import type { BombGameState, LiarGameState, Resumable, Screen } from '../types'
 import { performerNames, totalTurns } from '../lib/score'
 import { speechNumber, totalSpeeches } from '../lib/liar'
 
@@ -29,18 +29,24 @@ function liarProgress(state: LiarGameState): string {
   }
 }
 
+/** 폭탄 돌리기가 어디까지 진행됐는지 한 줄로 */
+function bombProgress(state: BombGameState): string {
+  return state.phase === 'boom' ? `${state.round}판 결과` : `${state.round}판 진행 중`
+}
+
+/** 하던 게임을 한 줄로 알려 준다 */
+function describeResumable(resumable: Resumable): string {
+  if (resumable.kind === 'liar') return `라이어 게임 · ${liarProgress(resumable.state)}`
+  if (resumable.kind === 'bomb') return `폭탄 돌리기 · ${bombProgress(resumable.state)}`
+  const state = resumable.state
+  const modeName = state.settings.mode === 'team' ? '팀 대항전' : '릴레이전'
+  const names = performerNames(state)
+  const performer = names[state.turns[state.turnIndex]?.performerIndex ?? 0] ?? ''
+  return `몸으로 말해요 · ${modeName} · ${state.turnIndex + 1}/${totalTurns(state)}번째 차례 (${performer})`
+}
+
 export default function HomeScreen({ navigate, resumable, onResume, onDiscardResume }: Props) {
-  const resumeLabel = !resumable
-    ? ''
-    : resumable.kind === 'liar'
-      ? `라이어 게임 · ${liarProgress(resumable.state)}`
-      : (() => {
-          const state = resumable.state
-          const modeName = state.settings.mode === 'team' ? '팀 대항전' : '릴레이전'
-          const names = performerNames(state)
-          const performer = names[state.turns[state.turnIndex]?.performerIndex ?? 0] ?? ''
-          return `몸으로 말해요 · ${modeName} · ${state.turnIndex + 1}/${totalTurns(state)}번째 차례 (${performer})`
-        })()
+  const resumeLabel = resumable ? describeResumable(resumable) : ''
 
   // 가운데 정렬은 justify-center가 아니라 위아래 끝의 mt-auto·mb-auto로 한다.
   // justify-center로 하면 화면이 작아 내용이 넘칠 때 위아래가 잘린 채 스크롤로도 닿지 않는다.
@@ -77,8 +83,8 @@ export default function HomeScreen({ navigate, resumable, onResume, onDiscardRes
         </div>
       )}
 
-      {/* 게임 두 개는 나란히, 술래 정하기는 그 아래에 넓게 */}
-      <main className="grid w-full max-w-3xl gap-5 sm:grid-cols-2">
+      {/* 게임 세 개를 먼저, 술래 정하기는 그 아래에 넓게 */}
+      <main className="grid w-full max-w-3xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
         <button
           type="button"
           onClick={() => navigate({ name: 'charades' })}
@@ -101,8 +107,18 @@ export default function HomeScreen({ navigate, resumable, onResume, onDiscardRes
         </button>
         <button
           type="button"
+          onClick={() => navigate({ name: 'bomb-setup' })}
+          className="flex-1 rounded-3xl bg-red-500 px-8 py-10 text-3xl font-bold text-white shadow-lg shadow-red-200 active:scale-95 sm:col-span-2 lg:col-span-1"
+        >
+          💣 폭탄 돌리기
+          <span className="mt-2 block text-base font-medium text-red-100">
+            말하고 넘기다 터지면 져요
+          </span>
+        </button>
+        <button
+          type="button"
           onClick={() => navigate({ name: 'picker' })}
-          className="rounded-3xl bg-slate-800 px-8 py-6 text-2xl font-bold text-white shadow-lg shadow-slate-300 active:scale-95 sm:col-span-2 sm:py-7 sm:text-3xl"
+          className="rounded-3xl bg-slate-800 px-8 py-6 text-2xl font-bold text-white shadow-lg shadow-slate-300 active:scale-95 sm:col-span-2 sm:py-7 sm:text-3xl lg:col-span-3"
         >
           👆 술래 정하기 · 팀 나누기
           <span className="mt-2 block text-base font-medium text-slate-300">
