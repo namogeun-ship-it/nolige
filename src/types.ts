@@ -264,6 +264,17 @@ export interface BombTopic {
 }
 
 /**
+ * 주제 목록을 손본 결과.
+ * 기본 주제는 지우지 않고 꺼 두기만 해서 언제든 되돌릴 수 있게 한다.
+ */
+export interface BombTopicPrefs {
+  /** 꺼 둔 주제 이름. 기본 주제와 직접 넣은 주제 모두 여기에 들어간다 */
+  disabledLabels: string[]
+  /** 직접 넣은 주제 이름. 답 목록이 없으므로 힌트는 나오지 않는다 */
+  customLabels: string[]
+}
+
+/**
  * countdown = 3-2-1 뒤에 폭탄이 돌기 시작한다
  * playing   = 폭탄이 돌고 있다. 남은 시간은 화면에 보여주지 않는다
  * boom      = 터졌다
@@ -308,6 +319,7 @@ export type Screen =
   | { name: 'setup'; mode: GameMode }
   | { name: 'liar-setup' }
   | { name: 'bomb-setup' }
+  | { name: 'bomb-topics' }
   | { name: 'picker' }
   | { name: 'words' }
   | { name: 'settings' }

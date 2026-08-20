@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { BombGameState, BombSettings, BombTopic } from '../types'
+import type { BombGameState, BombSettings, BombTopic, BombTopicPrefs } from '../types'
 import { pickTopic, rollFuseSec } from '../lib/bomb'
 import { clearBombGameState, saveBombGameState } from '../lib/storage'
 
@@ -17,8 +17,12 @@ function emptyTopic(): BombTopic {
   return { kind: 'topic', label: '아무 낱말', answers: [] }
 }
 
-export function useBombGame() {
+export function useBombGame(topicPrefs: BombTopicPrefs) {
   const [game, setGame] = useState<BombGameState | null>(null)
+
+  // 문제를 뽑는 시점의 손질 상태를 봐야 해서 ref 로 들고 있는다
+  const prefsRef = useRef(topicPrefs)
+  prefsRef.current = topicPrefs
 
   // ── 저장. 1초에 한 번을 넘지 않도록 서명을 비교한다
   const lastSignature = useRef('')
@@ -58,7 +62,7 @@ export function useBombGame() {
   }, [game?.phase, game?.round])
 
   const startGame = useCallback((settings: BombSettings) => {
-    const topic = pickTopic(settings, []) ?? emptyTopic()
+    const topic = pickTopic(settings, prefsRef.current, []) ?? emptyTopic()
     setGame({
       settings,
       phase: 'countdown',
@@ -91,7 +95,7 @@ export function useBombGame() {
   const nextRound = useCallback(() => {
     setGame((prev) => {
       if (!prev || prev.phase !== 'boom') return prev
-      const topic = pickTopic(prev.settings, prev.usedLabels) ?? emptyTopic()
+      const topic = pickTopic(prev.settings, prefsRef.current, prev.usedLabels) ?? emptyTopic()
       return {
         ...prev,
         phase: 'countdown',

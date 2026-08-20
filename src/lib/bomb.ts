@@ -1,4 +1,4 @@
-import type { BombGameState, BombSettings, BombTopic } from '../types'
+import type { BombGameState, BombSettings, BombTopic, BombTopicPrefs } from '../types'
 import { BOMB_CHOSUNG } from '../data/bombChosung'
 import { BOMB_TOPICS } from '../data/bombTopics'
 import { BOMB_HURRY_RATIO } from './constants'
@@ -32,10 +32,27 @@ export function spacedChosung(label: string): string {
 }
 
 /**
+ * 지금 쓸 수 있는 주제 목록.
+ * 꺼 둔 것은 빼고, 작가가 직접 넣은 것을 더한다.
+ * 직접 넣은 주제는 답을 미리 적어 둘 수 없으므로 힌트가 나오지 않는다.
+ */
+export function activeTopics(prefs: BombTopicPrefs): BombTopic[] {
+  const off = new Set(prefs.disabledLabels)
+  const list: BombTopic[] = []
+  for (const t of BOMB_TOPICS) {
+    if (!off.has(t.label)) list.push({ kind: 'topic', label: t.label, answers: t.answers })
+  }
+  for (const label of prefs.customLabels) {
+    if (!off.has(label)) list.push({ kind: 'topic', label, answers: [] })
+  }
+  return list
+}
+
+/**
  * 고른 종류에 해당하는 문제 후보를 전부 모은다.
  * 난이도로 걸러내지 않는다. 난이도는 힌트를 보여 줄지 말지로만 갈리기 때문이다.
  */
-function buildTopicPool(settings: BombSettings): BombTopic[] {
+function buildTopicPool(settings: BombSettings, prefs: BombTopicPrefs): BombTopic[] {
   const pool: BombTopic[] = []
   if (settings.topicKind === 'chosung' || settings.topicKind === 'mix') {
     for (const c of BOMB_CHOSUNG) {
@@ -43,24 +60,26 @@ function buildTopicPool(settings: BombSettings): BombTopic[] {
     }
   }
   if (settings.topicKind === 'topic' || settings.topicKind === 'mix') {
-    for (const t of BOMB_TOPICS) {
-      pool.push({ kind: 'topic', label: t.label, answers: t.answers })
-    }
+    pool.push(...activeTopics(prefs))
   }
   return pool
 }
 
 /** 이 설정으로 낼 수 있는 문제가 몇 개인지. 설정 화면에서 보여준다 */
-export function countTopics(settings: BombSettings): number {
-  return buildTopicPool(settings).length
+export function countTopics(settings: BombSettings, prefs: BombTopicPrefs): number {
+  return buildTopicPool(settings, prefs).length
 }
 
 /**
  * 다음 문제를 하나 뽑는다.
  * 최근에 나온 문제는 건너뛰고, 후보를 다 쓰면 그때 처음부터 다시 쓴다.
  */
-export function pickTopic(settings: BombSettings, usedLabels: string[]): BombTopic | null {
-  const pool = buildTopicPool(settings)
+export function pickTopic(
+  settings: BombSettings,
+  prefs: BombTopicPrefs,
+  usedLabels: string[],
+): BombTopic | null {
+  const pool = buildTopicPool(settings, prefs)
   if (pool.length === 0) return null
   const used = new Set(usedLabels)
   const fresh = pool.filter((t) => !used.has(t.label))
@@ -76,6 +95,22 @@ export function rollFuseSec(settings: BombSettings): number {
   const lo = Math.min(settings.minSec, settings.maxSec)
   const hi = Math.max(settings.minSec, settings.maxSec)
   return lo + Math.random() * (hi - lo)
+}
+
+/**
+ * 심지가 얼마나 남았는지 (1 = 그대로, 0 = 불꽃이 폭탄에 닿음).
+ *
+ * 이번 판의 실제 길이가 아니라 **설정에서 고른 가장 긴 시간**을 기준으로 잰다.
+ * 실제 길이로 재면 남은 시간이 화면에 그대로 드러나서, 언제 터질지 모른다는
+ * 이 놀이의 전부가 사라지기 때문이다.
+ *
+ * 그래서 짧은 폭탄이 걸린 판은 심지가 아직 절반이나 남았는데 터진다.
+ * 심지는 시간이 흐르고 있다는 것만 보여 줄 뿐, 얼마나 남았는지는 알려 주지 않는다.
+ */
+export function fuseLeftRatio(state: BombGameState): number {
+  const longest = Math.max(1, state.settings.maxSec)
+  const elapsed = state.fuseSec - state.remainingSec
+  return Math.max(0, Math.min(1, 1 - elapsed / longest))
 }
 
 /** 터지기 직전이라 째깍 소리를 빠르게 할 구간인지 */

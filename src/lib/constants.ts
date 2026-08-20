@@ -7,6 +7,7 @@ export const STORAGE_KEYS = {
   liarGame: 'charades.liarGame',
   dataVersion: 'charades.dataVersion',
   bombGame: 'charades.bombGame',
+  bombTopics: 'charades.bombTopics',
   recentWords: 'charades.recentWords',
 } as const
 
@@ -57,16 +58,23 @@ export const LIAR_MAX_ROUNDS = 3
 // 폭탄 돌리기
 /**
  * 폭탄이 터지기까지의 시간 범위. 판마다 이 사이에서 무작위로 정해진다.
- * 폭이 좁으면 언제쯤 터질지 짐작이 되고, 넓으면 끝까지 알 수 없다.
+ *
+ * 한 바퀴는 돌아야 놀이가 된다. 다섯 명이 한 사람당 대여섯 초씩 쓰면 한 바퀴가
+ * 삼십 초쯤이므로, 가장 짧은 것도 두 바퀴는 돌 수 있게 잡았다.
+ * 이보다 짧게 두면 한 사람이 두어 번 말하고 끝나 버려서 조여드는 맛이 없다.
+ *
+ * 폭이 넓을수록 언제 터질지 짐작하기 어렵다. 그래서 최소와 최대를 두 배 넘게 벌려 두었다.
  */
 export const BOMB_FUSE_PRESETS = [
-  { label: '짧게', minSec: 15, maxSec: 35 },
-  { label: '보통', minSec: 30, maxSec: 60 },
-  { label: '길게', minSec: 45, maxSec: 90 },
-  { label: '아주 길게', minSec: 60, maxSec: 150 },
+  { label: '짧게', minSec: 40, maxSec: 90 },
+  { label: '보통', minSec: 70, maxSec: 150 },
+  { label: '길게', minSec: 110, maxSec: 200 },
 ] as const
 
 export const DEFAULT_BOMB_FUSE = BOMB_FUSE_PRESETS[1]
+
+/** 직접 넣는 주제 이름의 최대 길이. 화면에 크게 나오므로 길면 작아진다 */
+export const MAX_BOMB_TOPIC_LENGTH = 12
 
 /** 마지막 이만큼이 남으면 째깍 소리가 빨라진다 (전체 시간에 대한 비율) */
 export const BOMB_HURRY_RATIO = 0.25

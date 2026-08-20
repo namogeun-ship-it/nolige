@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react'
-import type { BombSettings, BombTopicKind } from '../../types'
+import type { BombSettings, BombTopicKind, BombTopicPrefs, Screen } from '../../types'
 import { BOMB_FUSE_PRESETS, DEFAULT_BOMB_FUSE } from '../../lib/constants'
 import { countTopics } from '../../lib/bomb'
 import { Chip, Section, Toggle } from '../../components/SettingControls'
 
 interface Props {
   lastSettings?: BombSettings
+  topicPrefs: BombTopicPrefs
+  navigate: (screen: Screen) => void
   onStart: (settings: BombSettings) => void
   onBack: () => void
 }
@@ -28,7 +30,7 @@ const KIND_OPTIONS: { value: BombTopicKind; label: string; description: string }
   },
 ]
 
-export default function BombSetupScreen({ lastSettings, onStart, onBack }: Props) {
+export default function BombSetupScreen({ lastSettings, topicPrefs, navigate, onStart, onBack }: Props) {
   const [topicKind, setTopicKind] = useState<BombTopicKind>(lastSettings?.topicKind ?? 'mix')
   const [hintsEnabled, setHintsEnabled] = useState(lastSettings?.hintsEnabled ?? true)
   const [fuse, setFuse] = useState<{ minSec: number; maxSec: number }>(() =>
@@ -43,7 +45,7 @@ export default function BombSetupScreen({ lastSettings, onStart, onBack }: Props
     [topicKind, hintsEnabled, fuse, hurryUp],
   )
 
-  const topicCount = useMemo(() => countTopics(settings), [settings])
+  const topicCount = useMemo(() => countTopics(settings, topicPrefs), [settings, topicPrefs])
   const canStart = topicCount > 0
 
   return (
@@ -107,6 +109,16 @@ export default function BombSetupScreen({ lastSettings, onStart, onBack }: Props
                 )
               })}
             </div>
+            <button
+              type="button"
+              onClick={() => navigate({ name: 'bomb-topics' })}
+              className="mt-4 min-h-[60px] w-full rounded-2xl bg-slate-100 px-5 text-lg font-bold text-slate-700 active:scale-95"
+            >
+              📋 주제 고르기 · 직접 넣기
+            </button>
+            <p className="mt-3 text-sm text-slate-400">
+              나올 주제를 끄고 켜거나, 우리 반에 맞는 주제를 직접 넣을 수 있어요.
+            </p>
           </Section>
 
           <Section title="난이도" hint="힌트를 줄지로 정해요">

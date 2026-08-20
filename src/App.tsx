@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type {
   AppSettings,
   BombSettings,
+  BombTopicPrefs,
   Category,
   GameSettings,
   LiarSettings,
@@ -15,11 +16,13 @@ import {
   clearLiarGameState,
   loadAppSettings,
   loadBombGameState,
+  loadBombTopicPrefs,
   loadCategories,
   loadGameState,
   loadLiarGameState,
   loadWords,
   saveAppSettings,
+  saveBombTopicPrefs,
   saveCategories,
   saveWords,
 } from './lib/storage'
@@ -44,6 +47,7 @@ import LiarResultScreen from './screens/liar/LiarResultScreen'
 import BombSetupScreen from './screens/bomb/BombSetupScreen'
 import BombPlayScreen from './screens/bomb/BombPlayScreen'
 import BombBoomScreen from './screens/bomb/BombBoomScreen'
+import BombTopicsScreen from './screens/bomb/BombTopicsScreen'
 import PickerScreen from './screens/PickerScreen'
 import WordsScreen from './screens/WordsScreen'
 import SettingsScreen from './screens/SettingsScreen'
@@ -73,10 +77,11 @@ export default function App() {
   const [appSettings, setAppSettings] = useState<AppSettings>(() => loadAppSettings())
   // 새로고침이나 실수로 나갔을 때 되살릴 수 있게 시작하자마자 한 번 읽어 둔다
   const [resumable, setResumable] = useState<Resumable | null>(() => findResumable())
+  const [bombTopicPrefs, setBombTopicPrefs] = useState<BombTopicPrefs>(() => loadBombTopicPrefs())
 
   const game = useGame(words)
   const liar = useLiarGame(words, categories)
-  const bomb = useBombGame()
+  const bomb = useBombGame(bombTopicPrefs)
 
   // 게임 중에는 화면이 꺼지지 않게 붙잡아 둔다
   useWakeLock(game.game !== null || liar.game !== null || bomb.game !== null)
@@ -134,6 +139,11 @@ export default function App() {
     setCategories(next.categories)
     saveWords(next.words)
     saveCategories(next.categories)
+  }
+
+  const handleBombTopicPrefsChange = (next: BombTopicPrefs) => {
+    setBombTopicPrefs(next)
+    saveBombTopicPrefs(next)
   }
 
   const handleResume = () => {
@@ -292,8 +302,17 @@ export default function App() {
       {screen.name === 'bomb-setup' && (
         <BombSetupScreen
           lastSettings={appSettings.lastBombSettings}
+          topicPrefs={bombTopicPrefs}
+          navigate={setScreen}
           onStart={handleBombStart}
           onBack={() => setScreen({ name: 'home' })}
+        />
+      )}
+      {screen.name === 'bomb-topics' && (
+        <BombTopicsScreen
+          prefs={bombTopicPrefs}
+          onChange={handleBombTopicPrefsChange}
+          onBack={() => setScreen({ name: 'bomb-setup' })}
         />
       )}
       {screen.name === 'picker' && (
