@@ -1,7 +1,7 @@
 import type { BombGameState, BombSettings, BombTopic, BombTopicPrefs } from '../types'
 import { BOMB_CHOSUNG } from '../data/bombChosung'
 import { BOMB_TOPICS } from '../data/bombTopics'
-import { BOMB_HURRY_RATIO } from './constants'
+import { BOMB_HURRY_RATIO, BOMB_JITTER_SEC } from './constants'
 
 /** 한글 첫소리 19개. 유니코드에 실려 있는 순서 그대로다 */
 const CHOSUNG_TABLE = [
@@ -92,9 +92,13 @@ export function pickTopic(
  * 판마다 다시 뽑으므로 앞판이 길었다고 이번 판도 길지는 않다.
  */
 export function rollFuseSec(settings: BombSettings): number {
-  const lo = Math.min(settings.minSec, settings.maxSec)
-  const hi = Math.max(settings.minSec, settings.maxSec)
-  return lo + Math.random() * (hi - lo)
+  const drift = (Math.random() * 2 - 1) * BOMB_JITTER_SEC
+  return Math.max(5, settings.baseSec + drift)
+}
+
+/** 이번 설정에서 가장 늦게 터질 수 있는 시각(초) */
+export function longestFuseSec(settings: BombSettings): number {
+  return settings.baseSec + BOMB_JITTER_SEC
 }
 
 /**
@@ -108,7 +112,7 @@ export function rollFuseSec(settings: BombSettings): number {
  * 심지는 시간이 흐르고 있다는 것만 보여 줄 뿐, 얼마나 남았는지는 알려 주지 않는다.
  */
 export function fuseLeftRatio(state: BombGameState): number {
-  const longest = Math.max(1, state.settings.maxSec)
+  const longest = Math.max(1, longestFuseSec(state.settings))
   const elapsed = state.fuseSec - state.remainingSec
   return Math.max(0, Math.min(1, 1 - elapsed / longest))
 }

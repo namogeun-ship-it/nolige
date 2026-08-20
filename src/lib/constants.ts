@@ -57,21 +57,25 @@ export const LIAR_MAX_ROUNDS = 3
 
 // 폭탄 돌리기
 /**
- * 폭탄이 터지기까지의 시간 범위. 판마다 이 사이에서 무작위로 정해진다.
+ * 폭탄 길이로 바로 고를 수 있는 기준 시간(초).
  *
  * 한 바퀴는 돌아야 놀이가 된다. 다섯 명이 한 사람당 대여섯 초씩 쓰면 한 바퀴가
- * 삼십 초쯤이므로, 가장 짧은 것도 두 바퀴는 돌 수 있게 잡았다.
- * 이보다 짧게 두면 한 사람이 두어 번 말하고 끝나 버려서 조여드는 맛이 없다.
- *
- * 폭이 넓을수록 언제 터질지 짐작하기 어렵다. 그래서 최소와 최대를 두 배 넘게 벌려 두었다.
+ * 삼십 초쯤이므로, 가장 짧은 것이 딱 한 바퀴다.
  */
-export const BOMB_FUSE_PRESETS = [
-  { label: '짧게', minSec: 40, maxSec: 90 },
-  { label: '보통', minSec: 70, maxSec: 150 },
-  { label: '길게', minSec: 110, maxSec: 200 },
-] as const
+export const BOMB_BASE_PRESETS = [30, 60, 90] as const
 
-export const DEFAULT_BOMB_FUSE = BOMB_FUSE_PRESETS[1]
+export const DEFAULT_BOMB_BASE_SEC = 60
+
+/** 직접 고를 수 있는 범위. 삼 분을 넘기면 한 문제로 버티기가 지루해진다 */
+export const BOMB_MIN_BASE_SEC = 20
+export const BOMB_MAX_BASE_SEC = 150
+export const BOMB_BASE_STEP = 10
+
+/**
+ * 기준 시간에서 앞뒤로 이만큼 안에서 무작위로 터진다.
+ * 정확히 기준 시간에 터지면 몇 번 해 보고 초를 세게 되므로 흔들어 둔다.
+ */
+export const BOMB_JITTER_SEC = 10
 
 /** 직접 넣는 주제 이름의 최대 길이. 화면에 크게 나오므로 길면 작아진다 */
 export const MAX_BOMB_TOPIC_LENGTH = 12

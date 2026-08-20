@@ -289,6 +289,8 @@ export function loadBombGameState(): BombGameState | null {
   // 최소한의 형태 검사. 하나라도 어긋나면 복구를 포기한다.
   if (
     !stored.settings ||
+    // 폭탄 길이를 기준 시간 하나로 바꾸기 전에 저장된 게임은 되살리지 않는다
+    typeof stored.settings.baseSec !== 'number' ||
     !stored.topic ||
     typeof stored.topic.label !== 'string' ||
     // 힌트 데이터의 모양이 바뀌기 전에 저장된 게임은 되살리지 않는다

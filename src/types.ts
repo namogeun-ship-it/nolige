@@ -247,9 +247,11 @@ export interface BombSettings {
    * 그래서 문제를 난이도별로 나누지 않고, 막혔을 때 예시를 보여 줄지 말지로 정한다.
    */
   hintsEnabled: boolean
-  /** 폭탄이 터지기까지 걸리는 시간의 최소·최대. 이 사이에서 판마다 무작위로 정해진다 */
-  minSec: number
-  maxSec: number
+  /**
+   * 폭탄 길이의 기준 시간(초).
+   * 실제로는 이 앞뒤 십 초 안에서 판마다 무작위로 정해진다.
+   */
+  baseSec: number
   /** 터지기 직전에 째깍 소리가 빨라질지. 끄면 끝까지 일정해서 눈치챌 수 없다 */
   hurryUp: boolean
 }

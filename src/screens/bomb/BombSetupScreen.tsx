@@ -1,8 +1,15 @@
 import { useMemo, useState } from 'react'
 import type { BombSettings, BombTopicKind, BombTopicPrefs, Screen } from '../../types'
-import { BOMB_FUSE_PRESETS, DEFAULT_BOMB_FUSE } from '../../lib/constants'
+import {
+  BOMB_BASE_PRESETS,
+  BOMB_BASE_STEP,
+  BOMB_JITTER_SEC,
+  BOMB_MAX_BASE_SEC,
+  BOMB_MIN_BASE_SEC,
+  DEFAULT_BOMB_BASE_SEC,
+} from '../../lib/constants'
 import { countTopics } from '../../lib/bomb'
-import { Chip, Section, Toggle } from '../../components/SettingControls'
+import { Chip, Section, Stepper, Toggle } from '../../components/SettingControls'
 
 interface Props {
   lastSettings?: BombSettings
@@ -33,16 +40,12 @@ const KIND_OPTIONS: { value: BombTopicKind; label: string; description: string }
 export default function BombSetupScreen({ lastSettings, topicPrefs, navigate, onStart, onBack }: Props) {
   const [topicKind, setTopicKind] = useState<BombTopicKind>(lastSettings?.topicKind ?? 'mix')
   const [hintsEnabled, setHintsEnabled] = useState(lastSettings?.hintsEnabled ?? true)
-  const [fuse, setFuse] = useState<{ minSec: number; maxSec: number }>(() =>
-    lastSettings
-      ? { minSec: lastSettings.minSec, maxSec: lastSettings.maxSec }
-      : { minSec: DEFAULT_BOMB_FUSE.minSec, maxSec: DEFAULT_BOMB_FUSE.maxSec },
-  )
+  const [baseSec, setBaseSec] = useState(lastSettings?.baseSec ?? DEFAULT_BOMB_BASE_SEC)
   const [hurryUp, setHurryUp] = useState(lastSettings?.hurryUp ?? true)
 
   const settings: BombSettings = useMemo(
-    () => ({ topicKind, hintsEnabled, minSec: fuse.minSec, maxSec: fuse.maxSec, hurryUp }),
-    [topicKind, hintsEnabled, fuse, hurryUp],
+    () => ({ topicKind, hintsEnabled, baseSec, hurryUp }),
+    [topicKind, hintsEnabled, baseSec, hurryUp],
   )
 
   const topicCount = useMemo(() => countTopics(settings, topicPrefs), [settings, topicPrefs])
@@ -167,22 +170,34 @@ export default function BombSetupScreen({ lastSettings, topicPrefs, navigate, on
 
           <Section title="폭탄 길이" hint="언제 터질지는 아무도 몰라요">
             <div className="flex flex-wrap gap-3">
-              {BOMB_FUSE_PRESETS.map((f) => (
+              {BOMB_BASE_PRESETS.map((sec) => (
                 <Chip
-                  key={f.label}
+                  key={sec}
                   tone="red"
-                  selected={fuse.minSec === f.minSec && fuse.maxSec === f.maxSec}
-                  onClick={() => setFuse({ minSec: f.minSec, maxSec: f.maxSec })}
+                  selected={baseSec === sec}
+                  onClick={() => setBaseSec(sec)}
                 >
-                  {f.label}
-                  <span className="ml-2 text-sm opacity-70">
-                    {f.minSec}~{f.maxSec}초
-                  </span>
+                  {sec}초
                 </Chip>
               ))}
             </div>
+            <div className="mt-4">
+              <Stepper
+                value={baseSec}
+                min={BOMB_MIN_BASE_SEC}
+                max={BOMB_MAX_BASE_SEC}
+                step={BOMB_BASE_STEP}
+                unit="초"
+                onChange={setBaseSec}
+              />
+            </div>
             <p className="mt-3 text-sm text-slate-400">
-              판마다 이 사이에서 무작위로 정해집니다. 남은 시간은 화면에 나오지 않아요.
+              실제로는{' '}
+              <span className="font-bold text-slate-600">
+                {baseSec - BOMB_JITTER_SEC}초에서 {baseSec + BOMB_JITTER_SEC}초 사이
+              </span>
+              에서 판마다 무작위로 정해집니다. 정확히 {baseSec}초에 터지면 몇 번 해 보고 초를 세게
+              되거든요. 남은 시간은 화면에 나오지 않습니다.
             </p>
             <div className="mt-4">
               <Toggle
