@@ -36,7 +36,7 @@ export function spacedChosung(label: string): string {
  * 꺼 둔 것은 빼고, 작가가 직접 넣은 것을 더한다.
  * 직접 넣은 주제는 답을 미리 적어 둘 수 없으므로 힌트가 나오지 않는다.
  */
-export function activeTopics(prefs: BombTopicPrefs): BombTopic[] {
+function activeTopics(prefs: BombTopicPrefs): BombTopic[] {
   const off = new Set(prefs.disabledLabels)
   const list: BombTopic[] = []
   for (const t of BOMB_TOPICS) {
@@ -97,7 +97,7 @@ export function rollFuseSec(settings: BombSettings): number {
 }
 
 /** 이번 설정에서 가장 늦게 터질 수 있는 시각(초) */
-export function longestFuseSec(settings: BombSettings): number {
+function longestFuseSec(settings: BombSettings): number {
   return settings.baseSec + BOMB_JITTER_SEC
 }
 

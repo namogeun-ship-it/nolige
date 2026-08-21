@@ -36,6 +36,32 @@ export function setSoundEnabled(next: boolean): void {
   if (next) primeSound()
 }
 
+/**
+ * 폭발음 전용 출력 통로.
+ *
+ * 큰 소리를 여러 겹 쌓으면 그대로 더해져서 찢어지는 소리가 난다.
+ * 압축기를 한 번 거치면 찢어지지 않으면서도 훨씬 크고 묵직하게 들린다.
+ * 다른 소리는 이 통로를 쓰지 않는다. 짧은 효과음까지 눌리면 답답해진다.
+ */
+let boomBus: DynamicsCompressorNode | null = null
+function getBoomBus(): AudioNode | null {
+  if (!context) return null
+  if (boomBus) return boomBus
+  try {
+    const comp = context.createDynamicsCompressor()
+    comp.threshold.setValueAtTime(-20, context.currentTime)
+    comp.knee.setValueAtTime(26, context.currentTime)
+    comp.ratio.setValueAtTime(14, context.currentTime)
+    comp.attack.setValueAtTime(0.002, context.currentTime)
+    comp.release.setValueAtTime(0.45, context.currentTime)
+    comp.connect(context.destination)
+    boomBus = comp
+    return comp
+  } catch {
+    return null
+  }
+}
+
 interface ToneOptions {
   /** 시작 주파수(Hz) */
   from: number
@@ -48,9 +74,11 @@ interface ToneOptions {
   /** 시작을 얼마나 미룰지(초) */
   delay?: number
   type?: OscillatorType
+  /** 내보낼 곳. 생략하면 스피커로 바로 나간다 */
+  out?: AudioNode | null
 }
 
-function tone({ from, to, duration, volume = 0.18, delay = 0, type = 'sine' }: ToneOptions): void {
+function tone({ from, to, duration, volume = 0.18, delay = 0, type = 'sine', out }: ToneOptions): void {
   if (!enabled || !context) return
   try {
     const startAt = context.currentTime + delay
@@ -66,9 +94,68 @@ function tone({ from, to, duration, volume = 0.18, delay = 0, type = 'sine' }: T
     gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration)
 
     osc.connect(gain)
-    gain.connect(context.destination)
+    gain.connect(out ?? context.destination)
     osc.start(startAt)
     osc.stop(startAt + duration + 0.02)
+  } catch {
+    // 소리가 안 나도 게임은 계속돼야 한다
+  }
+}
+
+interface NoiseOptions {
+  /** 길이(초) */
+  duration: number
+  /** 소리 크기 (0~1) */
+  volume?: number
+  /** 시작을 얼마나 미룰지(초) */
+  delay?: number
+  /** 저역 통과 필터를 이 주파수에서 시작해 */
+  from?: number
+  /** 이 주파수까지 내린다. 높은 소리가 먼저 사라져 멀어지는 느낌이 난다 */
+  to?: number
+  /** 내보낼 곳. 생략하면 스피커로 바로 나간다 */
+  out?: AudioNode | null
+}
+
+/**
+ * 백색 잡음 한 덩어리.
+ *
+ * 폭발음은 음정이 있는 소리가 아니라 잡음이다.
+ * 오실레이터만으로는 삐 소리에 가까워서, 잡음을 만들어 저역 통과 필터를 쓸어내린다.
+ */
+function noise({
+  duration,
+  volume = 0.3,
+  delay = 0,
+  from = 5000,
+  to = 120,
+  out,
+}: NoiseOptions): void {
+  if (!enabled || !context) return
+  try {
+    const startAt = context.currentTime + delay
+    const frames = Math.max(1, Math.floor(context.sampleRate * duration))
+    const buffer = context.createBuffer(1, frames, context.sampleRate)
+    const data = buffer.getChannelData(0)
+    for (let i = 0; i < frames; i++) data[i] = Math.random() * 2 - 1
+
+    const source = context.createBufferSource()
+    source.buffer = buffer
+
+    const filter = context.createBiquadFilter()
+    filter.type = 'lowpass'
+    filter.frequency.setValueAtTime(from, startAt)
+    filter.frequency.exponentialRampToValueAtTime(Math.max(20, to), startAt + duration)
+
+    const gain = context.createGain()
+    gain.gain.setValueAtTime(volume, startAt)
+    gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration)
+
+    source.connect(filter)
+    filter.connect(gain)
+    gain.connect(out ?? context.destination)
+    source.start(startAt)
+    source.stop(startAt + duration + 0.02)
   } catch {
     // 소리가 안 나도 게임은 계속돼야 한다
   }
@@ -133,14 +220,28 @@ export function playFuseTick(): void {
   tone({ from: 1400, to: 900, duration: 0.035, volume: 0.09, type: 'square' })
 }
 
-/** 폭탄 돌리기: 옆 사람에게 넘길 때 */
-export function playHandoff(): void {
-  tone({ from: 520, to: 780, duration: 0.08, volume: 0.14, type: 'triangle' })
-}
-
-/** 폭탄 돌리기: 터졌다. 낮게 깔리는 소리를 여러 겹 쌓아 쿵 하고 터지게 만든다 */
+/**
+ * 폭탄 돌리기: 터졌다.
+ *
+ * 여덟 겹을 한꺼번에 쌓아 올린다. 폭발음은 한 소리가 아니라
+ * 파열, 몸통, 저음, 그리고 뒤늦게 돌아오는 잔향이 겹친 것이기 때문이다.
+ * 전부 압축기를 거쳐 나가므로 찢어지지 않으면서 크게 들린다.
+ */
 export function playBoom(): void {
-  tone({ from: 320, to: 40, duration: 0.7, volume: 0.28, type: 'sawtooth' })
-  tone({ from: 180, to: 30, duration: 0.9, volume: 0.24, type: 'square' })
-  tone({ from: 900, to: 60, duration: 0.35, volume: 0.18, type: 'triangle' })
+  const out = getBoomBus()
+
+  // 터지는 순간의 날카로운 파열
+  noise({ duration: 0.12, volume: 0.5, from: 14000, to: 4000, out })
+  // 폭발의 몸통. 높은 소리가 빠르게 사라지며 멀어진다
+  noise({ duration: 1.7, volume: 0.8, from: 9000, to: 55, out })
+  // 배를 치는 저음
+  tone({ from: 210, to: 18, duration: 1.7, volume: 0.5, type: 'sawtooth', out })
+  // 그보다 더 아래에서 오래 남는 울림
+  tone({ from: 72, to: 13, duration: 2.3, volume: 0.5, type: 'sine', out })
+  // 파편이 튀는 금속성
+  tone({ from: 1900, to: 40, duration: 0.34, volume: 0.3, type: 'triangle', out })
+  // 벽에 부딪혀 돌아오는 잔향 세 겹
+  noise({ duration: 1.7, volume: 0.34, delay: 0.18, from: 2400, to: 38, out })
+  noise({ duration: 1.5, volume: 0.22, delay: 0.52, from: 950, to: 28, out })
+  noise({ duration: 1.3, volume: 0.13, delay: 1.0, from: 420, to: 22, out })
 }

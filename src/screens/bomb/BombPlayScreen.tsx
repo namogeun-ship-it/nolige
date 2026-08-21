@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { BombGameState } from '../../types'
 import { fuseLeftRatio, isHurrying, spacedChosung, topicPrompt } from '../../lib/bomb'
 import ScaledWord from '../../components/ScaledWord'
@@ -13,31 +13,40 @@ interface Props {
 }
 
 /**
- * 째깍 소리와 심지가 움직이는 간격(밀리초).
+ * 째깍 소리 간격(밀리초).
+ * 시계처럼 일정해야 듣기 편하다. 불규칙한 것은 눈에 보이는 심지 쪽이다.
+ */
+const TICK_MS = 900
+const HURRY_TICK_MS = 260
+
+/**
+ * 심지가 한 번에 타들어가는 간격(밀리초).
  *
- * 일정한 박자로 타면 몇 번 해 본 아이는 박자를 세어 터질 때를 짐작한다.
+ * 일정하게 타면 몇 번 해 본 아이는 눈으로 재어 터질 때를 짐작한다.
  * 그래서 매번 다음 간격을 새로 뽑는다. 한참 멈춰 있다가 갑자기 훅 타들어가기도 하고,
  * 연달아 빠르게 타기도 한다. 터지는 시각 자체는 판이 시작될 때 이미 정해져 있고
- * 여기서 바뀌는 것은 보이고 들리는 박자뿐이다.
+ * 여기서 바뀌는 것은 눈에 보이는 속도뿐이다.
  */
-const PACE = {
-  normal: { min: 450, spread: 1500 },
-  hurry: { min: 130, spread: 280 },
+const BURN_PACE = {
+  normal: { min: 450, spread: 1800 },
+  hurry: { min: 140, spread: 420 },
 } as const
 
-function nextGap(hurrying: boolean): number {
-  const { min, spread } = hurrying ? PACE.hurry : PACE.normal
+function nextBurnGap(hurrying: boolean): number {
+  const { min, spread } = hurrying ? BURN_PACE.hurry : BURN_PACE.normal
   return min + Math.random() * spread
 }
 
 /**
- * 폭탄이 도는 동안의 화면.
- * 아이들이 폰을 손에서 손으로 넘기기만 하므로 누를 것을 두지 않는다.
- * 나가기 말고는 아무 단추도 없어서 넘기다 잘못 눌러 판이 끊길 일이 없다.
+ * 심지 그림의 좌표계와 모양.
+ * 폭탄 꼭대기(왼쪽 아래 끝)에서 오른쪽 위로 휘어 오르는 선이고,
+ * 불꽃은 이 선을 따라 오른쪽 끝에서 폭탄 쪽으로 내려온다.
  */
+const FUSE_BOX = { w: 150, h: 62 }
+const FUSE_PATH = 'M 75 62 C 83 46 96 24 144 11'
+
 export default function BombPlayScreen({ game, onBeginPlaying, onQuit }: Props) {
   const [countdown, setCountdown] = useState(3)
-  // 지금까지 힌트를 몇 번 눌렀는지. 0이면 아직 아무것도 안 보여 준 상태다
   const [hintCount, setHintCount] = useState(0)
   const [askQuit, setAskQuit] = useState(false)
 
@@ -48,10 +57,18 @@ export default function BombPlayScreen({ game, onBeginPlaying, onQuit }: Props) 
   const [shownPercent, setShownPercent] = useState(100)
   const targetPercent = useRef(100)
   targetPercent.current = fuseLeftRatio(game) * 100
+
   const label = game.topic.kind === 'chosung' ? spacedChosung(game.topic.label) : game.topic.label
 
   // 카운트다운 화면만 배경이 진하다
   useEdgeColor(game.phase === 'countdown' ? 'var(--color-red-500)' : '')
+
+  // 심지 위에서 불꽃이 있을 자리를 재려면 선의 전체 길이를 알아야 한다
+  const fuseRef = useRef<SVGPathElement>(null)
+  const [fuseLength, setFuseLength] = useState(0)
+  useLayoutEffect(() => {
+    if (fuseRef.current) setFuseLength(fuseRef.current.getTotalLength())
+  }, [game.phase])
 
   // 3-2-1 카운트다운
   useEffect(() => {
@@ -70,17 +87,22 @@ export default function BombPlayScreen({ game, onBeginPlaying, onQuit }: Props) 
     }
   }, [countdown, game.phase, onBeginPlaying])
 
-  // 심지 타는 소리와 심지 그림을 같은 박자로 움직인다.
-  // 박자는 매번 새로 뽑아서 멈췄다 훅 타들어가는 것처럼 보이게 한다.
+  // 째깍 소리는 시계처럼 일정하게
+  useEffect(() => {
+    if (game.phase !== 'playing') return
+    const id = window.setInterval(playFuseTick, hurrying ? HURRY_TICK_MS : TICK_MS)
+    return () => window.clearInterval(id)
+  }, [game.phase, game.round, hurrying])
+
+  // 심지는 불규칙하게. 멈춰 있다가 갑자기 훅 타들어간다
   useEffect(() => {
     if (game.phase !== 'playing') return
     let timer = 0
     const burn = () => {
-      playFuseTick()
       setShownPercent(targetPercent.current)
-      timer = window.setTimeout(burn, nextGap(hurrying))
+      timer = window.setTimeout(burn, nextBurnGap(hurrying))
     }
-    timer = window.setTimeout(burn, nextGap(hurrying))
+    timer = window.setTimeout(burn, nextBurnGap(hurrying))
     return () => window.clearTimeout(timer)
   }, [game.phase, game.round, hurrying])
 
@@ -92,8 +114,10 @@ export default function BombPlayScreen({ game, onBeginPlaying, onQuit }: Props) 
 
   // 답을 한꺼번에 늘어놓으면 그걸 차례로 읽기만 하면 되므로 한 번에 하나씩만 보여 준다.
   // 눌러도 다음 하나로 바뀔 뿐이라 앞의 것은 화면에 남지 않는다.
+  // 힌트가 없는 주제는 답 목록이 비어 있다. 나머지 연산에서 0으로 나누지 않도록 먼저 막는다
   const answers = game.topic.answers
-  const shownHint = hintCount > 0 ? answers[(hintCount - 1) % answers.length] : null
+  const shownHint =
+    hintCount > 0 && answers.length > 0 ? answers[(hintCount - 1) % answers.length] : null
 
   if (game.phase === 'countdown') {
     return (
@@ -107,8 +131,12 @@ export default function BombPlayScreen({ game, onBeginPlaying, onQuit }: Props) 
     )
   }
 
+  // 심지에서 아직 안 탄 부분의 길이. 불꽃은 그 끝에 선다
+  const burnAt = fuseLength * (shownPercent / 100)
+  const flame = fuseLength > 0 ? fuseRef.current?.getPointAtLength(burnAt) : undefined
+
   return (
-    <div className="flex h-full flex-col">
+    <div className={`flex h-full flex-col ${hurrying ? 'animate-danger-flash' : ''}`}>
       <header className="flex shrink-0 items-center gap-2 overflow-hidden px-3 py-1 sm:gap-4 sm:px-6 [@media(min-height:640px)]:py-3">
         <button
           type="button"
@@ -127,45 +155,81 @@ export default function BombPlayScreen({ game, onBeginPlaying, onQuit }: Props) 
         </span>
       </header>
 
-      {/*
-        타들어가는 심지. 불꽃이 왼쪽 폭탄 쪽으로 다가온다.
-        길이는 이번 판의 실제 길이가 아니라 설정에서 고른 가장 긴 시간 기준이라,
-        심지가 많이 남아 보여도 터질 수 있다. 남은 시간을 알려 주는 표시가 아니다.
-      */}
-      <div className="flex shrink-0 items-center gap-2 px-3 pb-2 sm:gap-3 sm:px-6 sm:pb-3">
-        <span
-          className="animate-bomb-pulse shrink-0 text-3xl sm:text-4xl"
-          style={{ animationDuration: hurrying ? '0.4s' : '1s' }}
+      <main className="flex min-h-0 flex-1 flex-col items-center justify-center gap-1 px-3 pb-2 sm:px-6 sm:pb-4">
+        {/*
+          타들어가는 심지. 불꽃이 오른쪽 끝에서 폭탄 쪽으로 내려온다.
+          길이는 이번 판의 실제 길이가 아니라 가장 늦게 터질 수 있는 시각 기준이라,
+          심지가 아직 남아 보여도 터질 수 있다. 남은 시간을 알려 주는 표시가 아니다.
+        */}
+        <svg
+          viewBox={`0 0 ${FUSE_BOX.w} ${FUSE_BOX.h}`}
+          className="w-[min(93vw,44vh)] shrink-0 overflow-visible"
+          aria-hidden
         >
-          💣
-        </span>
-        <div className="relative h-2.5 flex-1 rounded-full bg-slate-200 sm:h-3">
-          <div
-            className="absolute inset-y-0 left-0 rounded-full bg-slate-700"
-            style={{ width: `${shownPercent}%`, transition: 'width 260ms ease-out' }}
+          <defs>
+            <radialGradient id="flame-glow">
+              <stop offset="0%" stopColor="#fb923c" stopOpacity="0.55" />
+              <stop offset="60%" stopColor="#fb923c" stopOpacity="0.18" />
+              <stop offset="100%" stopColor="#fb923c" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+          <path
+            d={FUSE_PATH}
+            fill="none"
+            strokeLinecap="round"
+            strokeWidth={2.5}
+            className="stroke-slate-200"
           />
-          <span
-            className={`absolute -top-3 -translate-x-1/2 text-2xl sm:-top-4 sm:text-3xl ${
-              hurrying ? 'animate-bomb-pulse' : ''
-            }`}
-            style={{
-              left: `${shownPercent}%`,
-              transition: 'left 260ms ease-out',
-              animationDuration: '0.35s',
-            }}
-          >
-            🔥
-          </span>
-        </div>
-      </div>
+          <path
+            ref={fuseRef}
+            d={FUSE_PATH}
+            fill="none"
+            strokeLinecap="round"
+            strokeWidth={4}
+            className="stroke-slate-700"
+            strokeDasharray={`${burnAt} ${Math.max(1, fuseLength)}`}
+            style={{ transition: 'stroke-dasharray 420ms ease-in-out' }}
+          />
+          {flame && (
+            <g
+              style={{
+                transform: `translate(${flame.x}px, ${flame.y}px)`,
+                transition: 'transform 420ms ease-in-out',
+              }}
+            >
+              <circle r={13} fill="url(#flame-glow)" />
+              <g className="animate-flame-flicker">
+                <text textAnchor="middle" dominantBaseline="central" fontSize={16}>
+                  🔥
+                </text>
+              </g>
+            </g>
+          )}
+        </svg>
 
-      <main className="flex min-h-0 flex-1 flex-col px-3 pb-3 sm:px-6 sm:pb-5">
-        <ScaledWord text={label} />
-        <div className="shrink-0">
+        {/*
+          폭탄. 흔들지 않고 가만히 둔다.
+          움직이는 것은 심지와 소리뿐이라야 안에 적힌 제시어를 읽을 수 있다.
+          위쪽 여백을 음수로 줘서 심지 끝이 폭탄 안으로 물리게 한다.
+        */}
+        <div className="relative -mt-[1.5%] aspect-square w-[min(78vw,38vh)] shrink-0">
+          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-slate-600 via-slate-800 to-slate-950 shadow-2xl shadow-slate-400">
+            <span className="absolute top-[15%] left-[17%] h-[13%] w-[24%] -rotate-12 rounded-full bg-white/25 blur-[3px]" />
+          </div>
+          <div className="absolute inset-[18%] flex">
+            <ScaledWord
+              text={label}
+              className="text-white"
+              multiline={game.topic.kind === 'topic'}
+            />
+          </div>
+        </div>
+
+        <div className="shrink-0 pt-2">
           <p className="text-center text-lg font-semibold text-slate-500 sm:text-2xl">
             {topicPrompt(game.topic)}
           </p>
-          {game.settings.hintsEnabled && game.topic.answers.length > 0 && (
+          {game.settings.hintsEnabled && answers.length > 0 && (
             <div className="mt-3 flex items-center justify-center gap-3">
               {shownHint && (
                 <span
