@@ -221,27 +221,32 @@ export function playFuseTick(): void {
 }
 
 /**
+ * 폭발 한 방. 파열, 몸통, 저음을 한 덩어리로 낸다.
+ * power 를 낮추면 더 멀리서 터진 것처럼 작고 둔하게 들린다.
+ */
+function blast(out: AudioNode | null, delay: number, power: number, pitch: number): void {
+  noise({ duration: 0.1, volume: 0.45 * power, from: 14000, to: 3500, delay, out })
+  noise({ duration: 1.1, volume: 0.8 * power, from: 9000, to: 55, delay, out })
+  tone({ from: pitch, to: 18, duration: 1.1, volume: 0.5 * power, type: 'sawtooth', delay, out })
+  tone({ from: pitch * 0.36, to: 13, duration: 1.6, volume: 0.5 * power, type: 'sine', delay, out })
+}
+
+/**
  * 폭탄 돌리기: 터졌다.
  *
- * 여덟 겹을 한꺼번에 쌓아 올린다. 폭발음은 한 소리가 아니라
- * 파열, 몸통, 저음, 그리고 뒤늦게 돌아오는 잔향이 겹친 것이기 때문이다.
- * 전부 압축기를 거쳐 나가므로 찢어지지 않으면서 크게 들린다.
+ * 쾅 한 번이 아니라 쾅쾅쾅 네 번 연달아 터진다.
+ * 뒤로 갈수록 작고 둔해져서 멀어지며 잦아드는 것처럼 들린다.
+ * 전부 압축기를 거쳐 나가므로 겹쳐도 찢어지지 않고 크게만 들린다.
  */
 export function playBoom(): void {
   const out = getBoomBus()
 
-  // 터지는 순간의 날카로운 파열
-  noise({ duration: 0.12, volume: 0.5, from: 14000, to: 4000, out })
-  // 폭발의 몸통. 높은 소리가 빠르게 사라지며 멀어진다
-  noise({ duration: 1.7, volume: 0.8, from: 9000, to: 55, out })
-  // 배를 치는 저음
-  tone({ from: 210, to: 18, duration: 1.7, volume: 0.5, type: 'sawtooth', out })
-  // 그보다 더 아래에서 오래 남는 울림
-  tone({ from: 72, to: 13, duration: 2.3, volume: 0.5, type: 'sine', out })
-  // 파편이 튀는 금속성
-  tone({ from: 1900, to: 40, duration: 0.34, volume: 0.3, type: 'triangle', out })
-  // 벽에 부딪혀 돌아오는 잔향 세 겹
-  noise({ duration: 1.7, volume: 0.34, delay: 0.18, from: 2400, to: 38, out })
-  noise({ duration: 1.5, volume: 0.22, delay: 0.52, from: 950, to: 28, out })
-  noise({ duration: 1.3, volume: 0.13, delay: 1.0, from: 420, to: 22, out })
+  blast(out, 0, 1, 210)
+  blast(out, 0.34, 0.72, 175)
+  blast(out, 0.66, 0.5, 148)
+  blast(out, 1.02, 0.33, 124)
+
+  // 네 번을 관통해 길게 깔리는 잔향
+  noise({ duration: 2.1, volume: 0.22, delay: 0.2, from: 2000, to: 30, out })
+  noise({ duration: 1.6, volume: 0.12, delay: 1.35, from: 600, to: 22, out })
 }

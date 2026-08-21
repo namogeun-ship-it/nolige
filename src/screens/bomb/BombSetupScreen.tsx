@@ -28,7 +28,7 @@ const KIND_OPTIONS: { value: BombTopicKind; label: string; description: string }
   {
     value: 'topic',
     label: '💬 주제',
-    description: '동물 이름, 빨간색인 것처럼 조건이 나옵니다. 거기에 맞는 말을 하나씩 대세요.',
+    description: '동물, 빨간 것처럼 조건이 나옵니다. 거기에 맞는 말을 하나씩 대세요.',
   },
   {
     value: 'mix',
@@ -140,7 +140,7 @@ export default function BombSetupScreen({ lastSettings, topicPrefs, navigate, on
                   className={`mt-1 block text-sm ${hintsEnabled ? 'text-red-100' : 'text-slate-400'}`}
                 >
                   막히면 힌트 단추를 눌러 답을 하나씩 볼 수 있습니다. 한 번에 하나만 나오고,
-                  또 누르면 다른 하나로 바뀝니다. 가수 이름처럼 예시를 미리 적어 둘 수 없는
+                  또 누르면 다른 하나로 바뀝니다. 가수처럼 예시를 미리 적어 둘 수 없는
                   몇몇 주제에는 힌트가 없습니다.
                 </span>
               </button>

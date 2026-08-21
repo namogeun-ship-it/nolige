@@ -259,7 +259,7 @@ export interface BombSettings {
 /** 화면 한가운데 크게 나오는 이번 문제 */
 export interface BombTopic {
   kind: 'chosung' | 'topic'
-  /** 초성이면 'ㄱㅅ', 주제면 '동물 이름' */
+  /** 초성이면 'ㄱㅅ', 주제면 '동물' */
   label: string
   /** 이 문제의 답 스무 개. 힌트를 켠 판에서 앞의 몇 개를 보여준다 */
   answers: string[]

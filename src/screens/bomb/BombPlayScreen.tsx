@@ -163,7 +163,7 @@ export default function BombPlayScreen({ game, onBeginPlaying, onQuit }: Props) 
         */}
         <svg
           viewBox={`0 0 ${FUSE_BOX.w} ${FUSE_BOX.h}`}
-          className="w-[min(93vw,44vh)] shrink-0 overflow-visible"
+          className="w-[min(80vw,34vh)] shrink-0 overflow-visible [@media(min-height:640px)]:w-[min(93vw,50vh)]"
           aria-hidden
         >
           <defs>
@@ -212,11 +212,12 @@ export default function BombPlayScreen({ game, onBeginPlaying, onQuit }: Props) 
           움직이는 것은 심지와 소리뿐이라야 안에 적힌 제시어를 읽을 수 있다.
           위쪽 여백을 음수로 줘서 심지 끝이 폭탄 안으로 물리게 한다.
         */}
-        <div className="relative -mt-[1.5%] aspect-square w-[min(78vw,38vh)] shrink-0">
+        <div className="relative -mt-[1.5%] aspect-square w-[min(70vw,30vh)] shrink-0 [@media(min-height:640px)]:w-[min(88vw,44vh)]">
           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-slate-600 via-slate-800 to-slate-950 shadow-2xl shadow-slate-400">
             <span className="absolute top-[15%] left-[17%] h-[13%] w-[24%] -rotate-12 rounded-full bg-white/25 blur-[3px]" />
           </div>
-          <div className="absolute inset-[18%] flex">
+          {/* 제시어가 들어가는 액자. 원 안에 네모를 두면 글자가 어디까지인지 한눈에 들어온다 */}
+          <div className="absolute inset-[17%] flex rounded-2xl bg-slate-950/55 p-[5%] shadow-inner ring-2 ring-white/25 ring-inset">
             <ScaledWord
               text={label}
               className="text-white"

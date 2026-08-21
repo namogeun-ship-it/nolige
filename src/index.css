@@ -149,34 +149,55 @@ textarea {
   animation: boom-white 0.4s ease-out forwards;
 }
 
-/* 터지는 순간 화면이 통째로 흔들린다 */
+/*
+  터지는 순간 화면이 흔들린다.
+  쾅쾅쾅 네 번에 맞춰 흔들렸다 잦아들기를 되풀이하고, 뒤로 갈수록 약해진다.
+*/
 @keyframes screen-shake {
   0%,
+  28%,
+  50%,
+  66%,
   100% {
     transform: translate(0, 0);
   }
-  8% {
-    transform: translate(-10px, 6px);
+  4% {
+    transform: translate(-13px, 8px);
   }
-  18% {
-    transform: translate(9px, -8px);
+  9% {
+    transform: translate(11px, -9px);
   }
-  30% {
-    transform: translate(-7px, -5px);
+  15% {
+    transform: translate(-8px, -5px);
   }
-  44% {
-    transform: translate(6px, 6px);
+  22% {
+    transform: translate(5px, 5px);
   }
-  60% {
+  32% {
+    transform: translate(-9px, 5px);
+  }
+  38% {
+    transform: translate(7px, -6px);
+  }
+  45% {
     transform: translate(-4px, -3px);
   }
-  78% {
-    transform: translate(3px, 2px);
+  54% {
+    transform: translate(-5px, 3px);
+  }
+  60% {
+    transform: translate(4px, -4px);
+  }
+  72% {
+    transform: translate(-3px, 2px);
+  }
+  80% {
+    transform: translate(2px, -2px);
   }
 }
 
 .animate-screen-shake {
-  animation: screen-shake 0.55s ease-out;
+  animation: screen-shake 1.4s ease-out;
 }
 
 /* 폭탄이 터지는 순간 화면 전체가 한 번 번쩍인다 */
