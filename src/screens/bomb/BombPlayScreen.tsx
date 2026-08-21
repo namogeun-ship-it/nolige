@@ -114,10 +114,12 @@ export default function BombPlayScreen({ game, onBeginPlaying, onQuit }: Props) 
 
   // 답을 한꺼번에 늘어놓으면 그걸 차례로 읽기만 하면 되므로 한 번에 하나씩만 보여 준다.
   // 눌러도 다음 하나로 바뀔 뿐이라 앞의 것은 화면에 남지 않는다.
-  // 힌트가 없는 주제는 답 목록이 비어 있다. 나머지 연산에서 0으로 나누지 않도록 먼저 막는다
+  // 답을 한 바퀴 다 보여 준 뒤 처음으로 되돌리면, 아이들이 이미 말한 것을 또 말하게 된다.
+  // 그래서 되돌리지 않고 거기서 멈추고 다 썼다고 알린다.
   const answers = game.topic.answers
+  const usedAllHints = hintCount >= answers.length
   const shownHint =
-    hintCount > 0 && answers.length > 0 ? answers[(hintCount - 1) % answers.length] : null
+    hintCount > 0 && answers.length > 0 ? answers[Math.min(hintCount, answers.length) - 1] : null
 
   if (game.phase === 'countdown') {
     return (
@@ -242,10 +244,11 @@ export default function BombPlayScreen({ game, onBeginPlaying, onQuit }: Props) 
               )}
               <button
                 type="button"
-                onClick={() => setHintCount((c) => c + 1)}
-                className="min-h-[44px] rounded-2xl bg-amber-200 px-5 text-base font-bold whitespace-nowrap text-amber-800 active:scale-95 sm:min-h-[56px] sm:px-7 sm:text-xl"
+                disabled={usedAllHints}
+                onClick={() => setHintCount((c) => Math.min(c + 1, answers.length))}
+                className="min-h-[44px] rounded-2xl bg-amber-200 px-5 text-base font-bold whitespace-nowrap text-amber-800 disabled:bg-slate-100 disabled:text-slate-400 active:scale-95 sm:min-h-[56px] sm:px-7 sm:text-xl"
               >
-                {hintCount === 0 ? '💡 힌트' : '💡 다른 힌트'}
+                {usedAllHints ? '힌트가 끝났어요' : hintCount === 0 ? '💡 힌트' : '💡 다른 힌트'}
               </button>
             </div>
           )}

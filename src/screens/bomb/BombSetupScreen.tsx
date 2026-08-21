@@ -8,7 +8,7 @@ import {
   BOMB_MIN_BASE_SEC,
   DEFAULT_BOMB_BASE_SEC,
 } from '../../lib/constants'
-import { countTopics } from '../../lib/bomb'
+import { countActiveTopics, countTopics } from '../../lib/bomb'
 import { Chip, Section, Stepper, Toggle } from '../../components/SettingControls'
 
 interface Props {
@@ -49,6 +49,8 @@ export default function BombSetupScreen({ lastSettings, topicPrefs, navigate, on
   )
 
   const topicCount = useMemo(() => countTopics(settings, topicPrefs), [settings, topicPrefs])
+  // 주제를 하나도 안 고른 채로 시작하면 왜 주제가 안 나오는지 알 길이 없어서 미리 알려 준다
+  const chosenTopics = useMemo(() => countActiveTopics(topicPrefs), [topicPrefs])
   const canStart = topicCount > 0
 
   return (
@@ -119,9 +121,18 @@ export default function BombSetupScreen({ lastSettings, topicPrefs, navigate, on
             >
               📋 주제 고르기 · 직접 넣기
             </button>
-            <p className="mt-3 text-sm text-slate-400">
-              나올 주제를 끄고 켜거나, 우리 반에 맞는 주제를 직접 넣을 수 있어요.
-            </p>
+            {chosenTopics === 0 ? (
+              <p className="mt-3 rounded-2xl bg-amber-50 px-5 py-4 text-base font-semibold text-amber-800">
+                아직 고른 주제가 없어요.{' '}
+                {topicKind === 'chosung'
+                  ? '초성만 고르셨으니 그대로 하셔도 됩니다.'
+                  : '주제 고르기에서 오늘 쓸 주제를 골라 주세요.'}
+              </p>
+            ) : (
+              <p className="mt-3 text-sm text-slate-400">
+                주제 {chosenTopics}개를 골라 뒀어요. 더 고르거나 직접 넣을 수 있습니다.
+              </p>
+            )}
           </Section>
 
           <Section title="난이도" hint="힌트를 줄지로 정해요">

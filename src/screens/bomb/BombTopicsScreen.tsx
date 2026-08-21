@@ -21,10 +21,12 @@ interface Row {
 /**
  * 폭탄 돌리기에 나올 주제를 고르고 직접 넣는 화면.
  *
- * 기본 주제는 지우지 않고 꺼 두기만 한다. 언제든 도로 켤 수 있고,
- * 앱을 새로 배포해 기본 주제가 늘어나도 작가의 손질이 그대로 남는다.
- * 초성은 여기서 다루지 않는다. 초성은 낱말이 있느냐 없느냐의 문제라
- * 취향껏 고를 일이 아니기 때문이다.
+ * 처음에는 아무것도 골라져 있지 않다. 일흔 개가 넘는 주제를 전부 켜 두고
+ * 필요 없는 것을 지워 나가는 것보다, 오늘 쓸 것만 골라 담는 편이 빠르다.
+ * 기본 주제는 지워지지 않으므로 언제든 다시 고를 수 있다.
+ *
+ * 초성은 여기서 다루지 않는다. 초성은 취향이 아니라
+ * 낱말이 있느냐 없느냐의 문제라 고르고 말고 할 것이 아니기 때문이다.
  */
 export default function BombTopicsScreen({ prefs, onChange, onBack }: Props) {
   const [draft, setDraft] = useState('')
@@ -42,15 +44,15 @@ export default function BombTopicsScreen({ prefs, onChange, onBack }: Props) {
     [prefs.customLabels],
   )
 
-  const off = useMemo(() => new Set(prefs.disabledLabels), [prefs.disabledLabels])
-  const onCount = rows.filter((r) => !off.has(r.label)).length
+  const on = useMemo(() => new Set(prefs.enabledLabels), [prefs.enabledLabels])
+  const onCount = rows.filter((r) => on.has(r.label)).length
 
   const toggle = (label: string) => {
     onChange({
       ...prefs,
-      disabledLabels: off.has(label)
-        ? prefs.disabledLabels.filter((l) => l !== label)
-        : [...prefs.disabledLabels, label],
+      enabledLabels: on.has(label)
+        ? prefs.enabledLabels.filter((l) => l !== label)
+        : [...prefs.enabledLabels, label],
     })
   }
 
@@ -61,13 +63,17 @@ export default function BombTopicsScreen({ prefs, onChange, onBack }: Props) {
 
   const addCustom = () => {
     if (!canAdd) return
-    onChange({ ...prefs, customLabels: [...prefs.customLabels, trimmed] })
+    // 일부러 넣은 주제는 넣자마자 쓰는 것이 당연하므로 바로 켜 준다
+    onChange({
+      enabledLabels: [...prefs.enabledLabels, trimmed],
+      customLabels: [...prefs.customLabels, trimmed],
+    })
     setDraft('')
   }
 
   const removeCustom = (label: string) => {
     onChange({
-      disabledLabels: prefs.disabledLabels.filter((l) => l !== label),
+      enabledLabels: prefs.enabledLabels.filter((l) => l !== label),
       customLabels: prefs.customLabels.filter((l) => l !== label),
     })
   }
@@ -124,17 +130,43 @@ export default function BombTopicsScreen({ prefs, onChange, onBack }: Props) {
           <div className="flex flex-wrap items-baseline gap-3">
             <h2 className="text-xl font-bold text-slate-800">나올 주제</h2>
             <span className="text-sm text-slate-400">
-              {onCount}개 켜짐 · 전체 {rows.length}개
+              {onCount}개 골랐어요 · 전체 {rows.length}개
             </span>
           </div>
-          <p className="mt-2 text-sm text-slate-400">
-            눌러서 끄고 켤 수 있어요. 끈 주제는 나오지 않지만 지워지지는 않습니다.
+
+          <div className="mt-4 flex gap-3">
+            <button
+              type="button"
+              onClick={() => onChange({ ...prefs, enabledLabels: rows.map((r) => r.label) })}
+              disabled={onCount === rows.length}
+              className="min-h-[52px] flex-1 rounded-2xl bg-slate-100 text-base font-bold text-slate-700 disabled:opacity-40 active:scale-95"
+            >
+              전부 켜기
+            </button>
+            <button
+              type="button"
+              onClick={() => onChange({ ...prefs, enabledLabels: [] })}
+              disabled={onCount === 0}
+              className="min-h-[52px] flex-1 rounded-2xl bg-slate-100 text-base font-bold text-slate-700 disabled:opacity-40 active:scale-95"
+            >
+              전부 끄기
+            </button>
+          </div>
+
+          <p className="mt-3 text-sm text-slate-400">
+            눌러서 고르고 뺄 수 있어요. 뺀 주제는 나오지 않지만 지워지지는 않습니다.
             💡 표시가 있는 주제만 힌트가 나와요.
           </p>
 
+          {onCount === 0 && (
+            <p className="mt-3 rounded-2xl bg-amber-50 px-5 py-4 text-base font-semibold text-amber-800">
+              아직 고른 주제가 없어요. 하나도 고르지 않으면 주제 문제가 나오지 않습니다.
+            </p>
+          )}
+
           <ul className="mt-4 flex flex-wrap gap-2 sm:gap-3">
             {rows.map((r) => {
-              const isOn = !off.has(r.label)
+              const isOn = on.has(r.label)
               return (
                 <li key={r.label} className="flex items-stretch">
                   <button
@@ -172,20 +204,12 @@ export default function BombTopicsScreen({ prefs, onChange, onBack }: Props) {
         </section>
       </div>
 
-      <footer className="flex shrink-0 gap-3 border-t border-slate-200 bg-white px-4 py-3 sm:px-6 sm:py-4">
-        <button
-          type="button"
-          onClick={() => onChange({ ...prefs, disabledLabels: [] })}
-          disabled={prefs.disabledLabels.length === 0}
-          className="min-h-[60px] flex-1 rounded-2xl bg-slate-100 text-lg font-bold text-slate-700 disabled:opacity-40 active:scale-95"
-        >
-          전부 켜기
-        </button>
+      <footer className="shrink-0 border-t border-slate-200 bg-white px-4 py-3 sm:px-6 sm:py-4">
         <button
           type="button"
           onClick={() => setAskReset(true)}
-          disabled={prefs.disabledLabels.length === 0 && prefs.customLabels.length === 0}
-          className="min-h-[60px] flex-1 rounded-2xl bg-slate-100 text-lg font-bold text-slate-700 disabled:opacity-40 active:scale-95"
+          disabled={prefs.enabledLabels.length === 0 && prefs.customLabels.length === 0}
+          className="min-h-[60px] w-full rounded-2xl bg-slate-100 text-lg font-bold text-slate-700 disabled:opacity-40 active:scale-95"
         >
           처음으로 되돌리기
         </button>
@@ -193,11 +217,11 @@ export default function BombTopicsScreen({ prefs, onChange, onBack }: Props) {
 
       {askReset && (
         <ConfirmDialog
-          title="처음 상태로 되돌릴까요?"
-          message="꺼 둔 주제가 모두 켜지고, 직접 넣은 주제는 지워져요."
+          title="처음으로 되돌릴까요?"
+          message="골라 둔 주제가 모두 풀리고, 직접 넣은 주제는 지워져요."
           confirmLabel="되돌리기"
           onConfirm={() => {
-            onChange({ disabledLabels: [], customLabels: [] })
+            onChange({ enabledLabels: [], customLabels: [] })
             setAskReset(false)
           }}
           onCancel={() => setAskReset(false)}

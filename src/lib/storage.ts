@@ -310,15 +310,15 @@ export function saveBombGameState(state: BombGameState): void {
 
 /**
  * 주제 목록을 손본 결과. 기본 주제 자체는 코드에 그대로 있고
- * 여기에는 무엇을 껐는지와 무엇을 더 넣었는지만 저장한다.
- * 그래서 앱을 새로 배포해 기본 주제가 늘어나도 작가의 손질이 그대로 살아남는다.
+ * 여기에는 무엇을 골랐는지와 무엇을 더 넣었는지만 저장한다.
+ * 저장된 것이 없으면 아무것도 고르지 않은 상태로 연다.
  */
 export function loadBombTopicPrefs(): BombTopicPrefs {
   const stored = readJSON<Partial<BombTopicPrefs>>(STORAGE_KEYS.bombTopics)
-  if (!stored || typeof stored !== 'object') return { disabledLabels: [], customLabels: [] }
+  if (!stored || typeof stored !== 'object') return { enabledLabels: [], customLabels: [] }
   const clean = (v: unknown) =>
     Array.isArray(v) ? [...new Set(v.filter(isNonEmptyString).map((x) => x.trim()))] : []
-  return { disabledLabels: clean(stored.disabledLabels), customLabels: clean(stored.customLabels) }
+  return { enabledLabels: clean(stored.enabledLabels), customLabels: clean(stored.customLabels) }
 }
 
 export function saveBombTopicPrefs(prefs: BombTopicPrefs): void {
