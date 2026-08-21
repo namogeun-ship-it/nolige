@@ -71,28 +71,27 @@ export default function LiarRevealScreen({ game, onDone, onQuit }: Props) {
           onPointerLeave={stopPeek}
           onPointerCancel={stopPeek}
           onContextMenu={(e) => e.preventDefault()}
+          // 라이어와 시민의 카드 색이 다르면 화면 빛이 얼굴에 비쳐 옆에서 알아챈다.
+          // 그래서 색은 똑같이 두고 적힌 글자만 다르게 한다.
           className={`flex min-h-0 w-full max-w-4xl flex-1 flex-col items-center justify-center rounded-3xl px-5 py-4 text-center shadow-lg transition-colors ${
-            holding
-              ? isLiar
-                ? 'bg-red-500 shadow-red-200'
-                : 'bg-white shadow-violet-200'
-              : 'bg-violet-500 shadow-violet-200'
+            holding ? 'bg-white shadow-violet-200' : 'bg-violet-500 shadow-violet-200'
           }`}
         >
           {holding ? (
             isLiar ? (
               <>
-                {game.settings.tellCategoryToLiar && (
-                  <span className="rounded-full bg-red-100 px-4 py-1 text-base font-bold text-red-700 sm:text-xl">
-                    주제는 {game.categoryName}
-                  </span>
-                )}
-                <span className="mt-3 text-5xl sm:text-7xl">🤥</span>
-                <span className="mt-3 text-4xl leading-tight font-extrabold text-white sm:text-6xl">
-                  당신은 라이어입니다
+                {/*
+                  배지와 큰 글자와 안내가 시민 화면과 같은 자리에 오도록 맞춘다.
+                  큰 글자도 제시어와 비슷한 세 글자로 둔다. 글자가 화면을 더 많이 덮으면
+                  얼굴에 비치는 빛이 그만큼 어두워져서, 색을 맞춰도 티가 나기 때문이다.
+                  이 자리가 제시어 자리가 아니라는 것은 배지와 아래 문장이 알려 준다.
+                */}
+                <span className="shrink-0 rounded-full bg-violet-100 px-4 py-1 text-base font-bold text-violet-700 sm:text-xl">
+                  {game.settings.tellCategoryToLiar ? `주제는 ${game.categoryName}` : '주제는 비밀'}
                 </span>
-                <span className="mt-3 text-lg font-semibold text-red-100 sm:text-2xl">
-                  다른 사람 설명을 듣고 제시어를 알아내세요
+                <ScaledWord text="라이어" />
+                <span className="shrink-0 text-base font-semibold text-slate-400 sm:text-xl">
+                  당신이 라이어예요. 다른 사람 설명을 듣고 제시어를 알아내세요
                 </span>
               </>
             ) : (
